@@ -1,7 +1,6 @@
 name: dart_esr
 description: Dart package to encode/decode EOSIO Signing Request
 version: 0.0.1
-author: EOS Nation/Charles-Antoine Picard
 homepage: https://github.com/EOS-Nation/dart-esr
 
 environment:
