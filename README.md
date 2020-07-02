@@ -112,4 +112,4 @@ TODO when added to pub.dev
 
 Please file feature requests and bugs at the [issue tracker][tracker].
 
-[tracker]: https://github.com/primes-network/eosdart/issues
+[tracker]: https://github.com/EOS-Nation/dart-esr/issues
