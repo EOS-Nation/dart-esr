@@ -5,11 +5,11 @@ Future<void> main(List<String> arguments) async {
       chainName: ChainName.EOS_JUNGLE2);
 
   var permission = IdentityPermission()
-    ..actor = 'testName1111'
+    ..actor = 'testname1111'
     ..permission = 'active';
 
   var identity = Identity()..identityPermission = permission;
-  String callback = "https://callback.com";
+  String callback = "https://cNallback.com";
 
   var encoded = await esr.encodeIdentity(identity, callback);
   var decoded = esr.deserialize(encoded);
