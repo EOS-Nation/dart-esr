@@ -1,6 +1,9 @@
 import 'package:dart_esr/dart_esr.dart';
 
-Future<void> main(List<String> arguments) async {
+void main(List<String> arguments) => actionExample();
+
+Future<void> actionExample() async {
+  print('Action');
   var esr = EOSIOSigningrequest('https://jungle2.cryptolions.io', 'v1',
       chainName: ChainName.EOS_JUNGLE2);
 
@@ -17,8 +20,8 @@ Future<void> main(List<String> arguments) async {
     ..data = data;
 
   var encoded = await esr.encodeAction(action);
-  print('action : ' + encoded);
-
   var decoded = esr.deserialize(encoded);
-  print(decoded);
+
+  print('encoded : ' + encoded);
+  print('decoded : ' + decoded.toString());
 }
