@@ -13,6 +13,9 @@ dependencies:
   archive: 
     git:
       url: https://github.com/TheRealPaco/archive.git
+  eosdart:
+    git:
+      url: https://github.com/TheRealPaco/eosdart.git
       
 dev_dependencies:
   test: ^1.0.0

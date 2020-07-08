@@ -12,18 +12,11 @@ import 'package:dart_esr/src/utils/esr_constant.dart';
 import 'package:dart_esr/src/models/identity.dart';
 import 'package:dart_esr/src/models/signing_request.dart';
 
-//import from eosdart
-import 'package:dart_esr/eosdart/src/eosdart_base.dart';
-import 'package:dart_esr/eosdart/src/serialize.dart' as ser;
-
-import 'package:dart_esr/eosdart/src/models/abi.dart';
-import 'package:dart_esr/eosdart/src/models/action.dart';
-import 'package:dart_esr/eosdart/src/models/transaction.dart';
-//
+import 'package:eosdart/eosdart.dart' as eosDart;
 
 class EOSIOSigningrequest {
   EOSSerializeUtils _client;
-  Map<String, Type> _signingRequestTypes;
+  Map<String, eosDart.Type> _signingRequestTypes;
   SigningRequest _signingRequest;
   Uint8List _request;
 
@@ -39,8 +32,9 @@ class EOSIOSigningrequest {
     this._signingRequest = SigningRequest();
     this._client = EOSSerializeUtils(nodeUrl, nodeVersion);
 
-    this._signingRequestTypes = ser.getTypesFromAbi(ser.createInitialTypes(),
-        Abi.fromJson(json.decode(signingRequestJson)));
+    this._signingRequestTypes = eosDart.getTypesFromAbi(
+        eosDart.createInitialTypes(),
+        eosDart.Abi.fromJson(json.decode(signingRequestJson)));
 
     this.setChainId(chainName: chainName, chainId: chainId);
     this.setOtherFields(
@@ -72,19 +66,19 @@ class EOSIOSigningrequest {
     if (info != null) this._signingRequest.info = info;
   }
 
-  Future<String> encodeTransaction(Transaction transaction) async {
+  Future<String> encodeTransaction(eosDart.Transaction transaction) async {
     await _client.fullFillTransaction(transaction);
     _signingRequest.req = ['transaction', transaction.toJson()];
     return this._encode();
   }
 
-  Future<String> encodeAction(Action action) async {
+  Future<String> encodeAction(eosDart.Action action) async {
     await this._client.serializeActions([action]);
     _signingRequest.req = ['action', action.toJson()];
     return this._encode();
   }
 
-  Future<String> encodeActions(List<Action> actions) async {
+  Future<String> encodeActions(List<eosDart.Action> actions) async {
     await this._client.serializeActions(actions);
     var jsonAction = [];
     for (var action in actions) {
