@@ -1,5 +1,5 @@
 name: dart_esr
-description: dart-esr is a dart package used to generate an EOSIO signing request (ESR) to be send to a wallet (Anchor) to be sign
+description: dart-esr is used to generate an EOSIO signing request (ESR) for a transaction/action/actions[]/identity request to be send, sign and broadcast to a node by a wallet (Anchor)
 version: 0.1.0
 homepage: https://github.com/EOS-Nation/dart-esr
 
