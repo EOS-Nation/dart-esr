@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'package:dart_esr/eosdart/src/eosdart_base.dart';
-import 'package:dart_esr/eosdart/src/serialize.dart' as ser;
+import 'package:eosdart/eosdart.dart';
 
 part 'signing_request.g.dart';
 
@@ -34,13 +33,13 @@ class SigningRequest {
   String toString() => this.toJson().toString();
 
   Uint8List toBinary(Type type) {
-    var buffer = ser.SerialBuffer(Uint8List(0));
+    var buffer = SerialBuffer(Uint8List(0));
     type.serialize(type, buffer, this.toJson());
     return buffer.asUint8List();
   }
 
   factory SigningRequest.fromBinary(Type type, Uint8List data) {
-    var buffer = ser.SerialBuffer(data);
+    var buffer = SerialBuffer(data);
     var deserializedData =
         Map<String, dynamic>.from(type.deserialize(type, buffer));
     return SigningRequest.fromJson(deserializedData);
