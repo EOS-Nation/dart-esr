@@ -1,8 +1,7 @@
 import 'dart:typed_data';
 import 'package:json_annotation/json_annotation.dart';
 
-import 'package:dart_esr/eosdart/src/eosdart_base.dart';
-import 'package:dart_esr/eosdart/src/serialize.dart' as ser;
+import 'package:eosdart/eosdart.dart';
 
 part 'identity.g.dart';
 
@@ -22,7 +21,7 @@ class Identity {
   String toString() => this.toJson().toString();
 
   Uint8List toBinary(Type type) {
-    var buffer = ser.SerialBuffer(Uint8List(0));
+    var buffer = SerialBuffer(Uint8List(0));
     type.serialize(type, buffer, this.toJson());
     return buffer.asUint8List();
   }
