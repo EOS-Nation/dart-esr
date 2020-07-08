@@ -1,6 +1,6 @@
 name: dart_esr
-description: Dart package to encode/decode EOSIO Signing Request
-version: 0.0.1
+description: dart-esr is a dart package used to generate an EOSIO signing request (ESR) to be send to a wallet (Anchor) to be sign
+version: 0.1.0
 homepage: https://github.com/EOS-Nation/dart-esr
 
 environment:
