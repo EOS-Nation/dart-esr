@@ -3,12 +3,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
-
-//import from eosdart
 import 'package:eosdart/eosdart.dart' as eosDart;
-//
 
-/// EOSClient calls APIs against given EOS nodes
 class EOSSerializeUtils {
   EOSNode eosNode;
   int expirationInSec;
@@ -18,6 +14,7 @@ class EOSSerializeUtils {
     eosNode = EOSNode(nodeURL, nodeVersion);
   }
 
+  //Fill the transaction with the reference block data
   Future<eosDart.Transaction> fullFillTransaction(
       eosDart.Transaction transaction,
       {int blocksBehind = 3}) async {
@@ -26,9 +23,9 @@ class EOSSerializeUtils {
     var refBlock =
         await eosNode.getBlock((info.headBlockNum - blocksBehind).toString());
 
-    var trx = await this._fullFill(transaction, refBlock);
-    await this.serializeActions(trx.actions);
-    return trx;
+    await this._fullFill(transaction, refBlock);
+    await this.serializeActions(transaction.actions);
+    return transaction;
   }
 
   /// serialize actions in a transaction
@@ -56,19 +53,16 @@ class EOSSerializeUtils {
     for (var act in abi.abi.actions) {
       actions[act.name] = eosDart.getType(types, act.type);
     }
-    var result = eosDart.Contract(types, actions);
-    return result;
+    return eosDart.Contract(types, actions);
   }
 
   /// Fill the transaction withe reference block data
-  Future<eosDart.Transaction> _fullFill(
+  void _fullFill(
       eosDart.Transaction transaction, eosDart.Block refBlock) async {
     transaction.expiration =
         refBlock.timestamp.add(Duration(seconds: expirationInSec));
     transaction.refBlockNum = refBlock.blockNum & 0xffff;
     transaction.refBlockPrefix = refBlock.refBlockPrefix;
-
-    return transaction;
   }
 
   /// Convert action data to serialized form (hex) */
@@ -124,6 +118,5 @@ class EOSNode {
         ._post('/chain/get_raw_abi', {'account_name': accountName}).then((abi) {
       return eosDart.AbiResp.fromJson(abi);
     });
-    return null;
   }
 }
