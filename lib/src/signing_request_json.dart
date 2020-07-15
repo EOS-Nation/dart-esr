@@ -171,6 +171,10 @@ String signingRequestJson = '''
          "base": "",
          "fields": [
             {
+               "name": "authorization",
+               "type": "permission_level[]"
+            },
+            {
                "name": "permission",
                "type": "permission_level?"
             }

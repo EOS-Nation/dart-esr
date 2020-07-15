@@ -92,7 +92,14 @@ class EOSIOSigningrequest {
     if (callback == null) {
       throw 'Callback is needed';
     }
-    _signingRequest.req = ['identity', identity.toJson()];
+    var auth = eosDart.Authorization()
+      ..actor = identity?.identityPermission?.actor
+      ..permission = identity?.identityPermission?.permission;
+
+    var req = identity.toJson();
+    req['authorization'] = [auth.toJson()];
+
+    _signingRequest.req = ['identity', req];
     _signingRequest.callback = callback;
     _signingRequest.flags = 0;
 
