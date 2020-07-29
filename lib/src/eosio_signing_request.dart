@@ -1,22 +1,19 @@
-import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 
 import 'package:dart_esr/src/serializeUtils.dart';
-import 'package:dart_esr/src/signing_request_json.dart';
 
 import 'package:dart_esr/src/utils/base64u.dart';
 import 'package:dart_esr/src/utils/esr_constant.dart';
 
+import 'package:dart_esr/src/models/action.dart';
 import 'package:dart_esr/src/models/identity.dart';
+import 'package:dart_esr/src/models/transaction.dart';
 import 'package:dart_esr/src/models/signing_request.dart';
-
-import 'package:eosdart/eosdart.dart' as eosDart;
 
 class EOSIOSigningrequest {
   EOSSerializeUtils _client;
-  Map<String, eosDart.Type> _signingRequestTypes;
   SigningRequest _signingRequest;
   Uint8List _request;
 
@@ -31,10 +28,6 @@ class EOSIOSigningrequest {
   }) {
     this._signingRequest = SigningRequest();
     this._client = EOSSerializeUtils(nodeUrl, nodeVersion);
-
-    this._signingRequestTypes = eosDart.getTypesFromAbi(
-        eosDart.createInitialTypes(),
-        eosDart.Abi.fromJson(json.decode(signingRequestJson)));
 
     this.setChainId(chainName: chainName, chainId: chainId);
     this.setOtherFields(
@@ -66,19 +59,19 @@ class EOSIOSigningrequest {
     if (info != null) this._signingRequest.info = info;
   }
 
-  Future<String> encodeTransaction(eosDart.Transaction transaction) async {
+  Future<String> encodeTransaction(Transaction transaction) async {
     await _client.fullFillTransaction(transaction);
     _signingRequest.req = ['transaction', transaction.toJson()];
     return this._encode();
   }
 
-  Future<String> encodeAction(eosDart.Action action) async {
+  Future<String> encodeAction(Action action) async {
     await this._client.serializeActions([action]);
     _signingRequest.req = ['action', action.toJson()];
     return this._encode();
   }
 
-  Future<String> encodeActions(List<eosDart.Action> actions) async {
+  Future<String> encodeActions(List<Action> actions) async {
     await this._client.serializeActions(actions);
     var jsonAction = [];
     for (var action in actions) {
@@ -100,8 +93,8 @@ class EOSIOSigningrequest {
   }
 
   Future<String> _encode() async {
-    this._request =
-        _signingRequest.toBinary(_signingRequestTypes['signing_request']);
+    this._request = _signingRequest
+        .toBinary(ESRConstants.signingRequestAbiType['signing_request']);
 
     this._compressRequest();
     this._addVersionHeaderToRequest();
@@ -122,7 +115,7 @@ class EOSIOSigningrequest {
     var decompressed = ZLibDecoder().decodeBytes(list, raw: true);
 
     return SigningRequest.fromBinary(
-        _signingRequestTypes['signing_request'], decompressed);
+        ESRConstants.signingRequestAbiType['signing_request'], decompressed);
   }
 
   void _compressRequest() {

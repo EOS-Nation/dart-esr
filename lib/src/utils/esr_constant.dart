@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:dart_esr/src/signing_request_abi.dart';
+import 'package:eosdart/eosdart.dart';
+
 enum ChainName {
   UNKNOWN,
   EOS,
@@ -58,4 +63,7 @@ class ESRConstants {
     ChainName.FIO:
         '21dcae42c0182200e93f954a074011f9048a7624c6fe81d3c9541a614a88bd1c'
   };
+
+  static Map<String, Type> signingRequestAbiType = getTypesFromAbi(
+      createInitialTypes(), Abi.fromJson(json.decode(signingRequestAbi)));
 }

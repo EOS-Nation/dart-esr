@@ -8,6 +8,5 @@ export 'src/eosio_signing_request.dart';
 export 'src/utils/esr_constant.dart';
 
 export 'src/models/identity.dart';
-
-//export from eosdart
-export 'package:eosdart/eosdart.dart';
+export 'src/models/transaction.dart';
+export 'src/models/action.dart';

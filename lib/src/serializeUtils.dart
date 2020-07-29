@@ -2,8 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:http/http.dart' as http;
+import 'package:dart_esr/src/models/action.dart';
+import 'package:dart_esr/src/models/transaction.dart';
+
 import 'package:eosdart/eosdart.dart' as eosDart;
+
+import 'package:http/http.dart' as http;
 
 class EOSSerializeUtils {
   EOSNode eosNode;
@@ -15,8 +19,7 @@ class EOSSerializeUtils {
   }
 
   //Fill the transaction with the reference block data
-  Future<eosDart.Transaction> fullFillTransaction(
-      eosDart.Transaction transaction,
+  Future<Transaction> fullFillTransaction(Transaction transaction,
       {int blocksBehind = 3}) async {
     var info = await eosNode.getInfo();
 
@@ -29,8 +32,8 @@ class EOSSerializeUtils {
   }
 
   /// serialize actions in a transaction
-  void serializeActions(List<eosDart.Action> actions) async {
-    for (eosDart.Action action in actions) {
+  void serializeActions(List<Action> actions) async {
+    for (Action action in actions) {
       String account = action.account;
 
       var contract = await this._getContract(account);
@@ -57,8 +60,7 @@ class EOSSerializeUtils {
   }
 
   /// Fill the transaction withe reference block data
-  void _fullFill(
-      eosDart.Transaction transaction, eosDart.Block refBlock) async {
+  void _fullFill(Transaction transaction, eosDart.Block refBlock) async {
     transaction.expiration =
         refBlock.timestamp.add(Duration(seconds: expirationInSec));
     transaction.refBlockNum = refBlock.blockNum & 0xffff;
