@@ -7,11 +7,11 @@ Future<void> identityExample() async {
   var esr = EOSIOSigningrequest('https://jungle2.cryptolions.io', 'v1',
       chainName: ChainName.EOS_JUNGLE2);
 
-  var permission = IdentityPermission()
+  var authorization = Authorization()
     ..actor = 'testname1111'
     ..permission = 'active';
 
-  var identity = Identity()..identityPermission = permission;
+  var identity = Identity()..authorization = authorization;
   String callback = "https://cNallback.com";
 
   var encoded = await esr.encodeIdentity(identity, callback);
