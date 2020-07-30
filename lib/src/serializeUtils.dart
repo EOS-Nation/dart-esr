@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:dart_esr/src/encoding_options.dart';
 import 'package:dart_esr/src/models/action.dart';
+import 'package:dart_esr/src/models/authorization.dart';
 import 'package:dart_esr/src/models/transaction.dart';
 
 import 'package:eosdart/eosdart.dart' as eosDart;
@@ -36,7 +38,7 @@ class EOSSerializeUtils {
     for (Action action in actions) {
       String account = action.account;
 
-      var contract = await this._getContract(account);
+      var contract = await this.getContract(account);
 
       action.data = this._serializeActionData(
         contract,
@@ -47,8 +49,48 @@ class EOSSerializeUtils {
     }
   }
 
+//TODO: Move to eosDart serialize
+/** Deserialize action data. If `data` is a `string`, then it's assumed to be in hex. */
+  Object _deserializeActionData(
+      eosDart.Contract contract,
+      String account,
+      String name,
+      dynamic data,
+      TextEncoder textEncoder,
+      TextDecoder textDecoder) {
+    var action = contract.actions[name];
+    if (data is String) {
+      data = eosDart.hexToUint8List(data);
+    }
+    if (action == null) {
+      throw 'Unknown action ${name} in contract ${account}';
+    }
+    //TODO. deserialize action data doubt it work because same code did not work in other places
+    var buffer = eosDart.SerialBuffer(Uint8List(0));
+    buffer.pushArray(data as Uint8List);
+    return action.deserialize(buffer);
+  }
+
+  //TODO: Move to eosDart serialize
+  /** Deserialize action. If `data` is a `string`, then it's assumed to be in hex. */
+  Action deserializeAction(
+      eosDart.Contract contract,
+      String account,
+      String name,
+      List<Authorization> authorization,
+      dynamic data,
+      TextEncoder textEncoder,
+      TextDecoder textDecoder) {
+    return Action()
+      ..account = account
+      ..name = name
+      ..authorization = authorization
+      ..data = this._deserializeActionData(
+          contract, account, name, data, textEncoder, textDecoder);
+  }
+
   /// Get data needed to serialize actions in a contract */
-  Future<eosDart.Contract> _getContract(String accountName,
+  Future<eosDart.Contract> getContract(String accountName,
       {bool reload = false}) async {
     var abi = await eosNode.getRawAbi(accountName);
     var types = eosDart.getTypesFromAbi(eosDart.createInitialTypes(), abi.abi);

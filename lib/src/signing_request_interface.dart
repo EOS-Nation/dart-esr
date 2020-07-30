@@ -113,6 +113,26 @@ class CallbackPayload {
 }
 
 /**
+ * Context used to resolve a callback.
+ * Compatible with the JSON response from a `push_transaction` call.
+ */
+abstract class ResolvedCallback {
+  /** The URL to hit. */
+  String url;
+  /**
+     * Whether to run the request in the background. For a https url this
+     * means POST in the background instead of a GET redirect.
+     */
+  bool background;
+  /**
+     * The callback payload as a object that should be encoded to JSON
+     * and POSTed to background callbacks.
+     */
+  CallbackPayload payload;
+  ResolvedCallback(this.payload, this.url, this.background);
+}
+
+/**
  * Context used to resolve a transaction.
  * Compatible with the JSON response from a `get_block` call.
  */

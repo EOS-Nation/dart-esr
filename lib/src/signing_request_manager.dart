@@ -199,22 +199,22 @@ class SigningRequestManager {
    * @param serializedTransaction The serialized transaction.
    * @param options Creation options.
    */
-  static Future<SigningRequestManager> fromTransaction(
+  static SigningRequestManager fromTransaction(
       dynamic chainName, dynamic serializedTransaction,
-      {SigningRequestEncodingOptions options}) async {
+      {SigningRequestEncodingOptions options}) {
     //TODO: SigningRequestManager.fromTransaction 'not implemented yet'
     throw 'not implemented yet';
   }
 
   /** Creates a signing request from encoded `esr:` uri string. */
-  static Future<SigningRequestManager> from(String uri,
-      {SigningRequestEncodingOptions options}) async {
+  static SigningRequestManager from(String uri,
+      {SigningRequestEncodingOptions options}) {
     //TODO: SigningRequestManager.from 'not implemented yet'
     throw 'not implemented yet';
   }
 
-  static Future<SigningRequestManager> fromdata(Uint8List data,
-      {SigningRequestEncodingOptions options}) async {
+  static SigningRequestManager fromdata(Uint8List data,
+      {SigningRequestEncodingOptions options}) {
     //TODO: SigningRequestManager.fromdata 'not implemented yet'
     throw 'not implemented yet';
   }
@@ -364,20 +364,100 @@ class SigningRequestManager {
    * @param signer Placeholders in actions will be resolved to signer if set.
    */
   List<Action> resolveActions(Map<String, dynamic> abis, Authorization signer) {
-    //TODO: SigningRequestManager.resolveActions 'not implemented yet'
-    throw 'not implemented yet';
+    //TODO: check deserialization
+    return this.getRawActions().map((rawAction) {
+      eosDart.Abi contractAbi;
+      if (SigningRequestUtils.isIdentity(rawAction)) {
+        //TODO: check abi.data contractAbi = abi.data;
+      } else {
+        contractAbi = abis[rawAction.account];
+      }
+      if (contractAbi == null) {
+        throw 'Missing ABI definition for ${rawAction.account}';
+      }
+      var contract = SigningRequestUtils.getContract(contractAbi);
+
+      if (signer != null) {
+        // hook into eosjs name decoder and return the signing account if we encounter the placeholder
+        // this is fine because getContract re-creates the initial types each time
+        contract.types['name']?.deserialize = (eosDart.SerialBuffer buffer) {
+          var name = buffer.getName();
+          if (name == ESRConstants.PlaceholderName) {
+            return signer.actor;
+          } else if (name == ESRConstants.PlaceholderPermission) {
+            return signer.permission;
+          } else {
+            return name;
+          }
+        };
+      }
+
+      //TODO: use deserializeAction from eosDart
+      var action = serializeUtils.deserializeAction(
+          contract,
+          rawAction.account,
+          rawAction.name,
+          rawAction.authorization,
+          rawAction.data,
+          textEncoder,
+          textDecoder);
+
+      if (signer != null) {
+        action.authorization.forEach((auth) {
+          if (auth.actor == ESRConstants.PlaceholderName) {
+            auth.actor = signer.actor;
+          }
+          if (auth.permission == ESRConstants.PlaceholderPermission) {
+            auth.permission = signer.permission;
+          }
+          // backwards compatibility, actor placeholder will also resolve to permission when used in auth
+          if (auth.permission == ESRConstants.PlaceholderName) {
+            auth.permission = signer.permission;
+          }
+          return [auth];
+        });
+      }
+      return action;
+    }).toList();
   }
 
   Transaction resolveTransaction(
       Map<String, dynamic> abis, Authorization signer, TransactionContext ctx) {
-    //TODO: SigningRequestManager.resolveTransaction 'not implemented yet'
-    throw 'not implemented yet';
+    var tx = this.getRawTransaction();
+    if (!this.isIdentity() && !SigningRequestUtils.hasTapos(tx)) {
+      if (ctx.expiration != null &&
+          ctx.refBlockNnum != null &&
+          ctx.refBlockPrefix != null) {
+        tx.expiration = ctx.expiration;
+        tx.ref_block_num = ctx.refBlockNnum;
+        tx.ref_block_prefix = ctx.refBlockPrefix;
+      } else if (ctx.blockNum != null &&
+          ctx.refBlockPrefix != null &&
+          ctx.timestamp != null) {
+        tx.expiration = ctx.timestamp.add(Duration(
+            seconds: ctx.expireSeconds != null ? ctx.expireSeconds : 60));
+        tx.refBlockNum = ctx.blockNum & 0xffff;
+        tx.refBlockPrefix = ctx.refBlockPrefix;
+      } else {
+        throw 'Invalid transaction context, need either a reference block or explicit TAPoS values';
+      }
+    }
+    tx.actions = this.resolveActions(abis, signer);
+
+    return tx;
   }
 
   ResolvedSigningRequest resolve(
       Map<String, dynamic> abis, Authorization signer, TransactionContext ctx) {
-    //TODO: SigningRequestManager.resolve 'not implemented yet'
-    throw 'not implemented yet';
+    var transaction = this.resolveTransaction(abis, signer, ctx);
+    var buf = eosDart.SerialBuffer(Uint8List(0));
+
+    serializeUtils.serializeActions(transaction.actions);
+    SigningRequestManager.transactionType.serialize(buf, transaction);
+    var serializedTransaction = buf.asUint8List();
+
+    return ResolvedSigningRequest(
+        this, signer, transaction, serializedTransaction);
   }
 
   /**
@@ -585,14 +665,42 @@ class SigningRequestManager {
 }
 
 class ResolvedSigningRequest {
-  ResolvedSigningRequest() {
-    //TODO: class ResolvedSigningRequest 'not implemented yet'
+  SigningRequestManager request;
+  Authorization signer;
+  Transaction transaction;
+  Uint8List serializedTransaction;
+
+  /** Recreate a resolved request from a callback payload. */
+  static Future<ResolvedSigningRequest> fromPayload(
+      CallbackPayload payload, SigningRequestEncodingOptions options) async {
+    var request = SigningRequestManager.from(payload.req, options: options);
+    var abis = await request.fetchAbis();
+    return request.resolve(
+        abis,
+        Authorization()
+          ..actor = payload.sa
+          ..permission = payload.sp,
+        TransactionContext(
+            refBlockNnum: payload.rbn as int,
+            refBlockPrefix: payload.rid as int,
+            expiration: DateTime.parse(payload.ex)));
+  }
+
+  ResolvedSigningRequest(
+      this.request, this.signer, this.transaction, this.serializedTransaction);
+
+  String getTransactionId() {
+    return eosDart.arrayToHex(sha256.convert(this.serializedTransaction).bytes);
+  }
+
+  ResolvedCallback getCallback(List<String> signatures, {int blockNum}) {
+    //TODO: SigningRequestUtils.serializeAction 'not implemented yet' use serialize Utils
     throw 'not implemented yet';
   }
 }
 
 class SigningRequestUtils {
-  eosDart.Contract getContract(eosDart.Abi contractAbi) {
+  static eosDart.Contract getContract(eosDart.Abi contractAbi) {
     var types =
         eosDart.getTypesFromAbi(eosDart.createInitialTypes(), contractAbi);
     const actions = <String, eosDart.Type>{};
