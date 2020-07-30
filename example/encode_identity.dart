@@ -15,8 +15,8 @@ Future<void> identityExample() async {
   String callback = "https://cNallback.com";
 
   var encoded = await esr.encodeIdentity(identity, callback);
-  var decoded = esr.deserialize(encoded);
-
   print('encoded : ' + encoded);
+
+  var decoded = esr.deserialize(encoded);
   print('decoded : ' + decoded.toString());
 }

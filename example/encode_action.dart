@@ -7,9 +7,7 @@ Future<void> actionExample() async {
   var esr = EOSIOSigningrequest('https://jungle2.cryptolions.io', 'v1',
       chainName: ChainName.EOS_JUNGLE2);
 
-  var auth = <Authorization>[
-    Authorization.fromJson(ESRConstants.PlaceholderAuth)
-  ];
+  var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
   var data = <String, String>{'name': 'data'};
 
@@ -20,8 +18,8 @@ Future<void> actionExample() async {
     ..data = data;
 
   var encoded = await esr.encodeAction(action);
-  var decoded = esr.deserialize(encoded);
-
   print('encoded : ' + encoded);
+
+  var decoded = esr.deserialize(encoded);
   print('decoded : ' + decoded.toString());
 }

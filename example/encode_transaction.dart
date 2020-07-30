@@ -26,8 +26,8 @@ Future<void> transactionExample() async {
   var transaction = Transaction()..actions = actions;
 
   var encoded = await esr.encodeTransaction(transaction);
-  var decoded = esr.deserialize(encoded);
-
   print('encoded : ' + encoded);
+
+  var decoded = esr.deserialize(encoded);
   print('decoded : ' + decoded.toString());
 }
