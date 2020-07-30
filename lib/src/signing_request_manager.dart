@@ -17,7 +17,7 @@ import 'package:eosdart/eosdart.dart' as eosDart;
 
 import 'signing_request_interface.dart';
 
-class SigningRequest {
+class SigningRequestManager {
   static eosDart.Type type =
       ESRConstants.signingRequestAbiType['signing_request'];
   static eosDart.Type idType = ESRConstants.signingRequestAbiType['identity'];
@@ -38,7 +38,8 @@ class SigningRequest {
     * Create a new signing request.
     * Normally not used directly, see the `create` and `from` class methods.
     */
-  SigningRequest(this.version, this.data, this.textEncoder, this.textDecoder,
+  SigningRequestManager(
+      this.version, this.data, this.textEncoder, this.textDecoder,
       {this.zlib, this.abiProvider, this.signature}) {
     if (this.data.flags & ESRConstants.RequestFlagsBroadcast != 0 &&
         data.req.first is Identity) {
@@ -51,7 +52,7 @@ class SigningRequest {
   }
 
   /** Create a new signing request. */
-  static Future<SigningRequest> create(
+  static Future<SigningRequestManager> create(
     SigningRequestCreateArguments args, {
     SigningRequestEncodingOptions options,
     EOSSerializeUtils serializeUtils,
@@ -156,7 +157,7 @@ class SigningRequest {
       });
     }
 
-    var req = SigningRequest(
+    var req = SigningRequestManager(
         ESRConstants.ProtocolVersion, data, textEncoder, textDecoder,
         zlib: options.zlib, abiProvider: options.abiProvider);
 
@@ -167,7 +168,7 @@ class SigningRequest {
   }
 
   /** Creates an identity request. */
-  static Future<SigningRequest> identity(
+  static Future<SigningRequestManager> identity(
       SigningRequestCreateIdentityArguments args,
       {SigningRequestEncodingOptions options,
       EOSSerializeUtils serializeUtils}) async {
@@ -190,7 +191,7 @@ class SigningRequest {
         callback: args.callback,
         info: args.info);
 
-    return await SigningRequest.create(createArgs, options: options);
+    return await SigningRequestManager.create(createArgs, options: options);
   }
 
   /**
@@ -199,7 +200,7 @@ class SigningRequest {
    * @param serializedTransaction The serialized transaction.
    * @param options Creation options.
    */
-  static Future<SigningRequest> fromTransaction(
+  static Future<SigningRequestManager> fromTransaction(
       dynamic chainName, dynamic serializedTransaction,
       {SigningRequestEncodingOptions options}) async {
     //TODO:
@@ -207,13 +208,13 @@ class SigningRequest {
   }
 
   /** Creates a signing request from encoded `esr:` uri string. */
-  static Future<SigningRequest> from(String uri,
+  static Future<SigningRequestManager> from(String uri,
       {SigningRequestEncodingOptions options}) async {
     //TODO:
     throw 'not implemented yet';
   }
 
-  static Future<SigningRequest> fromdata(Uint8List data,
+  static Future<SigningRequestManager> fromdata(Uint8List data,
       {SigningRequestEncodingOptions options}) async {
     //TODO:
     throw 'not implemented yet';
@@ -315,7 +316,7 @@ class SigningRequest {
   Uint8List getData() {
     // var buffer = eosDart.SerialBuffer(Uint8List(0));
     // SigningRequest.type.serialize(buffer, this.data);
-    return this.data.toBinary(SigningRequest.type);
+    return this.data.toBinary(SigningRequestManager.type);
     // return buffer.asUint8List();
   }
 
@@ -416,7 +417,7 @@ class SigningRequest {
         Identity req1 = req[1];
         if (req1?.authorization != null) {
           var buf = eosDart.SerialBuffer(Uint8List(0));
-          SigningRequest.idType.serialize(buf, req[1]);
+          SigningRequestManager.idType.serialize(buf, req[1]);
           data = eosDart.arrayToHex(buf.asUint8List());
           authorization = [req1?.authorization];
         }
@@ -560,7 +561,7 @@ class SigningRequest {
   }
 
   /** Return a deep copy of this request. */
-  SigningRequest clone() {
+  SigningRequestManager clone() {
     RequestSignature signature;
     if (this.signature != null) {
       signature = RequestSignature.clone(
@@ -568,8 +569,8 @@ class SigningRequest {
     }
     var data = this.data.toJson();
 
-    return SigningRequest(this.version, abi.SigningRequest.fromJson(data),
-        this.textEncoder, this.textDecoder,
+    return SigningRequestManager(this.version,
+        abi.SigningRequest.fromJson(data), this.textEncoder, this.textDecoder,
         zlib: this.zlib, abiProvider: this.abiProvider, signature: signature);
   }
 
