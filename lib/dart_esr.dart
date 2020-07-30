@@ -10,5 +10,6 @@ export 'src/utils/esr_constant.dart';
 export 'src/models/action.dart';
 export 'src/models/authorization.dart';
 export 'src/models/identity.dart';
-export 'src/models/signing_request.dart';
 export 'src/models/transaction.dart';
+
+export 'src/signing_request.dart';
