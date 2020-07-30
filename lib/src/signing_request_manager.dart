@@ -149,7 +149,6 @@ class SigningRequestManager {
     data.info = [];
     if (args.info != null) {
       args.info.forEach((key, value) {
-        //TODO: check info maybe change for List<Map<String, String>>
         var encodedValue = textEncoder.encode(value);
         data.info.add(InfoPair()
           ..key = key
@@ -203,20 +202,20 @@ class SigningRequestManager {
   static Future<SigningRequestManager> fromTransaction(
       dynamic chainName, dynamic serializedTransaction,
       {SigningRequestEncodingOptions options}) async {
-    //TODO:
+    //TODO: SigningRequestManager.fromTransaction 'not implemented yet'
     throw 'not implemented yet';
   }
 
   /** Creates a signing request from encoded `esr:` uri string. */
   static Future<SigningRequestManager> from(String uri,
       {SigningRequestEncodingOptions options}) async {
-    //TODO:
+    //TODO: SigningRequestManager.from 'not implemented yet'
     throw 'not implemented yet';
   }
 
   static Future<SigningRequestManager> fromdata(Uint8List data,
       {SigningRequestEncodingOptions options}) async {
-    //TODO:
+    //TODO: SigningRequestManager.fromdata 'not implemented yet'
     throw 'not implemented yet';
   }
 
@@ -365,19 +364,19 @@ class SigningRequestManager {
    * @param signer Placeholders in actions will be resolved to signer if set.
    */
   List<Action> resolveActions(Map<String, dynamic> abis, Authorization signer) {
-    //TODO:
+    //TODO: SigningRequestManager.resolveActions 'not implemented yet'
     throw 'not implemented yet';
   }
 
   Transaction resolveTransaction(
       Map<String, dynamic> abis, Authorization signer, TransactionContext ctx) {
-    //TODO:
+    //TODO: SigningRequestManager.resolveTransaction 'not implemented yet'
     throw 'not implemented yet';
   }
 
   ResolvedSigningRequest resolve(
       Map<String, dynamic> abis, Authorization signer, TransactionContext ctx) {
-    //TODO:
+    //TODO: SigningRequestManager.resolve 'not implemented yet'
     throw 'not implemented yet';
   }
 
@@ -587,7 +586,7 @@ class SigningRequestManager {
 
 class ResolvedSigningRequest {
   ResolvedSigningRequest() {
-    //TODO:
+    //TODO: class ResolvedSigningRequest 'not implemented yet'
     throw 'not implemented yet';
   }
 }
@@ -606,7 +605,7 @@ class SigningRequestUtils {
   }
 
   Future<void> serializeAction() async {
-    //TODO:
+    //TODO: SigningRequestUtils.serializeAction 'not implemented yet' use serialize Utils
     throw 'not implemented yet';
   }
 

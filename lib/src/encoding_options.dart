@@ -25,7 +25,7 @@ class DefaultZlibProvider implements ZlibProvider {
 class DefaultAbiProvider implements AbiProvider {
   @override
   Future getAbi(String account) {
-    // TODO: implement getAbi
+    // TODO: DefaultAbiProvider.getAbi 'not implemented yet'
     throw UnimplementedError();
   }
 }
