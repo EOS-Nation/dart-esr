@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
+import 'package:dart_esr/src/models/info_pair.dart';
 
 import 'package:dart_esr/src/serializeUtils.dart';
 
@@ -24,7 +25,7 @@ class EOSIOSigningrequest {
     ChainName chainName,
     int flags = 1,
     String callback = '',
-    List info,
+    List<InfoPair> info,
   }) {
     this._signingRequest = SigningRequest();
     this._client = EOSSerializeUtils(nodeUrl, nodeVersion);
@@ -53,10 +54,13 @@ class EOSIOSigningrequest {
     }
   }
 
-  void setOtherFields({int flags, String callback, List info}) {
+  void setOtherFields({int flags, String callback, List<InfoPair> info}) {
     if (flags != null) this._signingRequest.flags = flags;
     if (callback != null) this._signingRequest.callback = callback;
-    if (info != null) this._signingRequest.info = info;
+    info.forEach((element) {
+      element.toJson();
+    });
+    if (info != null && !info.isEmpty) this._signingRequest.info = info;
   }
 
   Future<String> encodeTransaction(Transaction transaction) async {

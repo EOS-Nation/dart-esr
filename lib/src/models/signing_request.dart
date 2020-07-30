@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:dart_esr/src/models/info_pair.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:eosdart/eosdart.dart';
@@ -20,7 +21,7 @@ class SigningRequest {
   String callback = '';
 
   @JsonKey(name: 'info')
-  List<dynamic> info = [];
+  List<InfoPair> info = [];
 
   SigningRequest();
 

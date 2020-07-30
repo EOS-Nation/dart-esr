@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:dart_esr/src/models/authorization.dart';
 import 'package:dart_esr/src/signing_request_abi.dart';
-import 'package:eosdart/eosdart.dart';
+import 'package:eosdart/eosdart.dart' as eosDart;
 
 enum ChainName {
   UNKNOWN,
@@ -22,20 +23,29 @@ enum ChainName {
 
 class ESRConstants {
   static const int ProtocolVersion = 2;
-  //const AbiTypes = Serialize.getTypesFromAbi(Serialize.createInitialTypes(), abi.data);
+
+  static Map<String, eosDart.Type> signingRequestAbiType =
+      eosDart.getTypesFromAbi(eosDart.createInitialTypes(),
+          eosDart.Abi.fromJson(json.decode(signingRequestAbi)));
+
+  static const RequestFlagsNone = 0;
+  static const RequestFlagsBroadcast = 1 << 0;
+  static const RequestFlagsBackground = 1 << 1;
+
   static const Scheme = 'esr:';
   static const PlaceholderName = '............1'; // aka uint64(1)
   static const PlaceholderPermission = '............2'; // aka uint64(2)
-  static const PlaceholderAuth = {
-    'actor': PlaceholderName,
-    'permission': PlaceholderPermission,
-  };
+  static Authorization PlaceholderAuth = Authorization()
+    ..actor = PlaceholderName
+    ..permission = PlaceholderPermission;
 
   static getChainAlias(ChainName name) {
     return name.index + 1;
   }
 
   static final Map<ChainName, String> ChainIdLookup = {
+    ChainName.UNKNOWN:
+        '0000000000000000000000000000000000000000000000000000000000000000',
     ChainName.EOS:
         'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
     ChainName.EOS_JUNGLE2:
@@ -61,9 +71,6 @@ class ESRConstants {
     ChainName.PROTON:
         '384da888112027f0321850a169f737c33e53b388aad48b5adace4bab97f437e0',
     ChainName.FIO:
-        '21dcae42c0182200e93f954a074011f9048a7624c6fe81d3c9541a614a88bd1c'
+        '21dcae42c0182200e93f954a074011f9048a7624c6fe81d3c9541a614a88bd1c',
   };
-
-  static Map<String, Type> signingRequestAbiType = getTypesFromAbi(
-      createInitialTypes(), Abi.fromJson(json.decode(signingRequestAbi)));
 }
