@@ -12,13 +12,7 @@ class SigningRequestCreateArguments {
       this.chainId,
       this.identity,
       this.info,
-      this.transaction}) {
-    if (!(this.chainId is ChainName) &&
-        !(this.chainId is int) &&
-        !(this.chainId is String)) {
-      throw 'Invalid arguments: ChainId must be of type ESRConstants.ChainName, string or int';
-    }
-  }
+      this.transaction});
   /** Single action to create request with. */
   Action action;
   /** Multiple actions to create request with. */

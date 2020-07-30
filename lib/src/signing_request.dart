@@ -75,16 +75,20 @@ class SigningRequest {
         args.transaction == null) {
       await serializeUtils.serializeActions([args.action]);
 
-      data.req = ['action', args.action];
+      data.req = ['action', args.action.toJson()];
     } else if (args.actions != null &&
         args.action == null &&
         args.transaction == null) {
-      await serializeUtils.serializeActions([args.action]);
+      await serializeUtils.serializeActions(args.actions);
 
+      var jsonAction = [];
+      for (var action in args.actions) {
+        jsonAction.add(action.toJson());
+      }
       if (args.actions.length == 1) {
-        data.req = ['action', args.actions.first];
+        data.req = ['action', jsonAction.first];
       } else {
-        data.req = ['action[]', args.actions];
+        data.req = ['action[]', jsonAction];
       }
     } else if (args.transaction != null &&
         args.action == null &&
@@ -119,13 +123,14 @@ class SigningRequest {
 
       // encode actions if needed
       await serializeUtils.serializeActions(tx.actions);
-      data.req = ['transaction', tx];
+      data.req = ['transaction', tx.toJson()];
     } else {
       throw 'Invalid arguments: Must have exactly one of action, actions or transaction';
     }
 
     // set the chain id
     data.chainId = SigningRequestUtils.variantId(args.chainId);
+
     data.flags = ESRConstants.RequestFlagsNone;
     var broadcast = args.broadcast != null ? args.broadcast : true;
     if (broadcast) {
@@ -179,6 +184,7 @@ class SigningRequest {
       permission = null;
     }
     var createArgs = SigningRequestCreateArguments(
+        chainId: args.chainId,
         identity: Identity()..authorization = permission,
         broadcast: false,
         callback: args.callback,
@@ -278,7 +284,7 @@ class SigningRequest {
    *                   Defaults to true.
    * @returns An esr uri string.
    */
-  String encode({bool compress, bool slashes}) {
+  String encode({bool compress, bool slashes = true}) {
     var shouldCompress = compress != null ? compress : this.zlib != null;
     if (shouldCompress && this.zlib == null) {
       throw 'Need zlib to compress';
@@ -286,39 +292,36 @@ class SigningRequest {
     var header = this.version;
     var data = this.getData();
     var sigData = this.getSignatureData();
-    var array = new Uint8List(data.lengthInBytes + sigData.lengthInBytes);
-    array.addAll(data);
-    array.add(0);
-    array.addAll(sigData);
-    array.add(data.lengthInBytes);
+    var temp = <int>[];
+    temp.addAll(data);
+    temp.addAll(sigData);
+    var array = Uint8List.fromList(temp);
     if (shouldCompress) {
       var deflated = this.zlib?.deflateRaw(array);
-      if (array.lengthInBytes > deflated.lengthInBytes) {
-        header |= 1 << 7;
-        array = deflated;
-      }
+      header |= 1 << 7;
+      array = deflated;
     }
-    var out = Uint8List(1 + array.lengthInBytes);
-    out[0] = header;
+    var out = <int>[];
+    out.add(header);
     out.addAll(array);
-    out.add(1);
     var scheme = ESRConstants.Scheme;
     if (slashes) {
       scheme += '//';
     }
-    return scheme + Base64u().encode(out);
+    return scheme + Base64u().encode(Uint8List.fromList(out));
   }
 
   /** Get the request data without header or signature. */
   Uint8List getData() {
-    var buffer = eosDart.SerialBuffer(Uint8List(0));
-    SigningRequest.type.serialize(buffer, this.data);
-    return buffer.asUint8List();
+    // var buffer = eosDart.SerialBuffer(Uint8List(0));
+    // SigningRequest.type.serialize(buffer, this.data);
+    return this.data.toBinary(SigningRequest.type);
+    // return buffer.asUint8List();
   }
 
   /** Get signature data, returns an empty array if request is not signed. */
   Uint8List getSignatureData() {
-    if (this.signature = null) {
+    if (this.signature == null) {
       return Uint8List(0);
     }
     var buffer = eosDart.SerialBuffer(Uint8List(0));
@@ -565,7 +568,7 @@ class SigningRequest {
     }
     var data = this.data.toJson();
 
-    return new SigningRequest(this.version, abi.SigningRequest.fromJson(data),
+    return SigningRequest(this.version, abi.SigningRequest.fromJson(data),
         this.textEncoder, this.textDecoder,
         zlib: this.zlib, abiProvider: this.abiProvider, signature: signature);
   }
@@ -606,16 +609,24 @@ class SigningRequestUtils {
     throw 'not implemented yet';
   }
 
+  /**
+   * chainId : int | String | ChainName
+   */
   static List<dynamic> variantId(dynamic chainId) {
     if (chainId == null) {
       chainId = ChainName.EOS;
     }
-    if (chainId is ChainName) {
-      chainId = ESRConstants.ChainIdLookup[chainId];
-      return ['chain_id', chainId];
-    }
-    if (chainId is int) {
-      return ['chain_alias', chainId];
+    switch (chainId.runtimeType) {
+      case int:
+        return ['chain_alias', chainId];
+      case String:
+        return ['chain_id', chainId];
+      case ChainName:
+        chainId = ESRConstants.ChainIdLookup[chainId];
+        return ['chain_id', chainId];
+        break;
+      default:
+        throw 'Invalid arguments: chainId must be of type int | String | ChainName';
     }
   }
 

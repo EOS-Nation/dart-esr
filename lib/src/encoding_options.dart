@@ -13,12 +13,12 @@ SigningRequestEncodingOptions defaultSigningRequestEncodingOptions =
 class DefaultZlibProvider implements ZlibProvider {
   @override
   Uint8List deflateRaw(Uint8List data) {
-    return ZLibDecoder().decodeBytes(data, raw: true);
+    return ZLibEncoder().encode(data, raw: true);
   }
 
   @override
   Uint8List inflateRaw(Uint8List data) {
-    return ZLibEncoder().encode(data, raw: true);
+    return ZLibDecoder().decodeBytes(data, raw: true);
   }
 }
 
