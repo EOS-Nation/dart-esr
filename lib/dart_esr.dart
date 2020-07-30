@@ -9,6 +9,7 @@ export 'src/utils/esr_constant.dart';
 
 export 'src/models/action.dart';
 export 'src/models/authorization.dart';
+export 'src/models/info_pair.dart';
 export 'src/models/identity.dart';
 export 'src/models/transaction.dart';
 
