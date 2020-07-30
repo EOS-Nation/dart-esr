@@ -15,11 +15,12 @@ SigningRequest _$SigningRequestFromJson(Map<String, dynamic> json) {
     ..info = json['info'] as List;
 }
 
-Map<String, dynamic> _$SigningRequestToJson(SigningRequest instance) =>
-    <String, dynamic>{
-      'chain_id': instance.chainId,
-      'req': instance.req,
-      'flags': instance.flags,
-      'callback': instance.callback,
-      'info': instance.info,
-    };
+Map<String, dynamic> _$SigningRequestToJson(SigningRequest instance) {
+  return <String, dynamic>{
+    'chain_id': instance.chainId,
+    'req': instance.req,
+    'flags': instance.flags,
+    'callback': instance.callback,
+    'info': instance.info?.map((e) => e?.toJson())?.toList(),
+  };
+}

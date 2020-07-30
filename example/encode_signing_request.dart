@@ -9,7 +9,7 @@ import 'package:dart_esr/src/utils/esr_constant.dart';
 
 main(List<String> args) async {
   // transactionTest();
-  identityTest();
+  actionTest();
 }
 
 Future<void> actionTest() async {
@@ -25,9 +25,10 @@ Future<void> actionTest() async {
     ..data = data;
 
   var args = SigningRequestCreateArguments(
-    action: action,
-    chainId: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
-  );
+      action: action,
+      chainId:
+          'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
+      info: {'key': 'sctfgkhlkjnlm'});
   SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
 
   var request =
