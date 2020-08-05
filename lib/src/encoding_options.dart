@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
+import 'package:dart_esr/src/models/request_signature.dart';
 
 SigningRequestEncodingOptions defaultSigningRequestEncodingOptions =
     SigningRequestEncodingOptions(
@@ -99,15 +100,4 @@ abstract class AbiProvider {
 abstract class SignatureProvider {
   /** Sign 32-byte hex-encoded message and return signer name and signature string. */
   RequestSignature sign(String message);
-}
-
-class RequestSignature {
-  String signer;
-  String signature;
-
-  RequestSignature(this.signer, this.signature);
-
-  static RequestSignature clone(String signer, String signature) {
-    return RequestSignature(signer, signature);
-  }
 }
