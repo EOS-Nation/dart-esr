@@ -34,7 +34,7 @@ class SigningRequestCreateArguments {
    */
   CallbackType callback;
   /** Optional metadata to pass along with the request. */
-  Map<String, String> info;
+  Map<String, dynamic> info;
 }
 
 class SigningRequestCreateIdentityArguments {
@@ -68,7 +68,7 @@ class SigningRequestCreateIdentityArguments {
    */
   String permission;
   /** Optional metadata to pass along with the request. */
-  Map<String, String> info;
+  Map<String, dynamic> info;
 }
 
 class CallbackType {
@@ -99,6 +99,12 @@ class CallbackPayload {
   String ex;
   /** All signatures 0-indexed as `sig0`, `sig1`, etc. */
   Map<String, String> signatures;
+
+  //TODO check if good place
+  String linkKey;
+  String linkName;
+  String linkCh;
+
   CallbackPayload(
       {this.bn,
       this.ex,
@@ -109,7 +115,10 @@ class CallbackPayload {
       this.sig,
       this.signatures,
       this.sp,
-      this.tx});
+      this.tx,
+      this.linkCh,
+      this.linkKey,
+      this.linkName});
 }
 
 /**

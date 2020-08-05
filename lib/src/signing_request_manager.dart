@@ -149,7 +149,14 @@ class SigningRequestManager {
     data.info = [];
     if (args.info != null) {
       args.info.forEach((key, value) {
-        var encodedValue = textEncoder.encode(value);
+        Uint8List encodedValue;
+        if (value is Uint8List) {
+          encodedValue = value;
+        } else if (value is String) {
+          encodedValue = textEncoder.encode(value);
+        } else {
+          throw 'info value must be either a string or a Uint8List';
+        }
         data.info.add(InfoPair()
           ..key = key
           ..value = eosDart.arrayToHex(encodedValue));
