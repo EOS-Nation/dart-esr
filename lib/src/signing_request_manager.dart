@@ -62,7 +62,7 @@ class SigningRequestManager {
     }
     TextEncoder textEncoder = options.textEncoder != null
         ? options.textEncoder
-        : defaultSigningRequestEncodingOptions.textDecoder;
+        : defaultSigningRequestEncodingOptions.textEncoder;
     TextDecoder textDecoder = options.textDecoder != null
         ? options.textDecoder
         : defaultSigningRequestEncodingOptions.textDecoder;
