@@ -6,7 +6,8 @@ import 'package:dart_esr/src/models/action.dart';
 import 'package:dart_esr/src/models/authorization.dart';
 import 'package:dart_esr/src/models/identity.dart';
 import 'package:dart_esr/src/models/info_pair.dart';
-import 'package:dart_esr/src/models/signing_request.dart' as abi;
+import 'package:dart_esr/src/models/request_signature.dart';
+import 'package:dart_esr/src/models/signing_request.dart';
 import 'package:dart_esr/src/models/transaction.dart';
 
 import 'package:dart_esr/src/serializeUtils.dart';
@@ -27,7 +28,7 @@ class SigningRequestManager {
   EOSSerializeUtils serializeUtils;
 
   int version;
-  abi.SigningRequest data;
+  SigningRequest data;
   TextEncoder textEncoder;
   TextDecoder textDecoder;
   ZlibProvider zlib;
@@ -67,7 +68,7 @@ class SigningRequestManager {
         ? options.textDecoder
         : defaultSigningRequestEncodingOptions.textDecoder;
 
-    var data = abi.SigningRequest();
+    var data = SigningRequest();
     // set the request data
     if (args.identity != null) {
       data.req = ['identity', args.identity.toJson()];
@@ -207,23 +208,84 @@ class SigningRequestManager {
    * @param options Creation options.
    */
   static SigningRequestManager fromTransaction(
-      dynamic chainName, dynamic serializedTransaction,
+      dynamic chainId, dynamic serializedTransaction,
       {SigningRequestEncodingOptions options}) {
-    //TODO: SigningRequestManager.fromTransaction 'not implemented yet'
-    throw 'not implemented yet';
+    if (chainId is String) {
+      chainId = eosDart.arrayToHex(chainId);
+    }
+    if (serializedTransaction is String) {
+      serializedTransaction = eosDart.hexToUint8List(serializedTransaction);
+    }
+
+    var buf = new eosDart.SerialBuffer(Uint8List(0));
+
+    buf.push([2]);
+    var id = SigningRequestUtils.variantId(chainId);
+    if (id[0] == 'chain_alias') {
+      buf.push([0]);
+      buf.push(id[1]);
+    } else {
+      buf.push([1]);
+      buf.pushArray(eosDart.hexToUint8List(id[1]));
+    }
+    buf.push([2]); // transaction variant
+    buf.pushArray(serializedTransaction);
+    buf.push([ESRConstants.RequestFlagsBroadcast]); // flags
+    buf.push([0]); // callback
+    buf.push([0]); // info
+
+    return SigningRequestManager.fromData(buf.asUint8List(), options: options);
   }
 
   /** Creates a signing request from encoded `esr:` uri string. */
   static SigningRequestManager from(String uri,
       {SigningRequestEncodingOptions options}) {
-    //TODO: SigningRequestManager.from 'not implemented yet'
-    throw 'not implemented yet';
+    if (uri is String) {
+      throw 'Invalid request uri';
+    }
+    var splitUri = uri.split(':');
+    var scheme = splitUri[0];
+    var path = splitUri[1];
+    if (scheme != 'esr' && scheme != 'web+esr') {
+      throw 'Invalid scheme';
+    }
+    var data =
+        Base64u().decode(path.startsWith('//') ? path.substring(2) : path);
+    return SigningRequestManager.fromData(data, options: options);
   }
 
-  static SigningRequestManager fromdata(Uint8List data,
+  static SigningRequestManager fromData(Uint8List data,
       {SigningRequestEncodingOptions options}) {
-    //TODO: SigningRequestManager.fromdata 'not implemented yet'
-    throw 'not implemented yet';
+    var header = data[0];
+    var version = header & ~(1 << 7);
+    if (version != ESRConstants.ProtocolVersion) {
+      throw 'Unsupported protocol version';
+    }
+    var array = data.sublist(1);
+    if ((header & (1 << 7)) != 0) {
+      if (options.zlib == null) {
+        throw 'Compressed URI needs zlib';
+      }
+      array = options.zlib.inflateRaw(array);
+    }
+
+    var textEncoder =
+        options.textEncoder ?? defaultSigningRequestEncodingOptions.textEncoder;
+    var textDecoder =
+        options.textDecoder ?? defaultSigningRequestEncodingOptions.textDecoder;
+
+    var req = SigningRequest.fromBinary(type, data);
+
+    RequestSignature signature;
+    try {
+      signature = RequestSignature.fromBinary(
+          ESRConstants.signingRequestAbiType['request_signature'], data);
+    } catch (e) {}
+
+    return SigningRequestManager(version, req, textEncoder, textDecoder,
+        zlib: options.zlib,
+        abiProvider: options.abiProvider,
+        signature: signature);
   }
 
   /**
@@ -253,7 +315,9 @@ class SigningRequestManager {
    * @param signature The signature string.
    */
   void setSignature(String signer, String signature) {
-    this.signature = RequestSignature(signer, signature);
+    this.signature = RequestSignature()
+      ..signer = signer
+      ..signature = signature;
   }
 
   /**
@@ -655,8 +719,8 @@ class SigningRequestManager {
     }
     var data = this.data.toJson();
 
-    return SigningRequestManager(this.version,
-        abi.SigningRequest.fromJson(data), this.textEncoder, this.textDecoder,
+    return SigningRequestManager(this.version, SigningRequest.fromJson(data),
+        this.textEncoder, this.textDecoder,
         zlib: this.zlib, abiProvider: this.abiProvider, signature: signature);
   }
 
