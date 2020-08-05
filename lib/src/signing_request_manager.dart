@@ -240,7 +240,7 @@ class SigningRequestManager {
   /** Creates a signing request from encoded `esr:` uri string. */
   static SigningRequestManager from(String uri,
       {SigningRequestEncodingOptions options}) {
-    if (uri is String) {
+    if (!(uri is String)) {
       throw 'Invalid request uri';
     }
     var splitUri = uri.split(':');
