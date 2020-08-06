@@ -278,12 +278,6 @@ class SigningRequestManager {
 
     var signingRequest = SigningRequest.fromBinary(type, buf);
 
-    if (signingRequest.req.first == 'identity' &&
-        signingRequest.req[1]['permission'] == null) {
-      signingRequest.req[1]['permission'] =
-          ESRConstants.PlaceholderAuth.toJson();
-    }
-
     RequestSignature signature;
     if (buf.haveReadData()) {
       signature = RequestSignature.fromBinary(
@@ -410,8 +404,8 @@ class SigningRequestManager {
   /** ABI definitions required to resolve request. */
   List<String> getRequiredAbis() {
     var rawActions = this.getRawActions();
-    rawActions.removeWhere(
-        (Action action) => !SigningRequestUtils.isIdentity(action));
+    rawActions
+        .removeWhere((Action action) => SigningRequestUtils.isIdentity(action));
     return rawActions.map((action) => action.account).toSet().toList();
   }
 
@@ -758,7 +752,7 @@ class ResolvedSigningRequest {
   static Future<ResolvedSigningRequest> fromPayload(
       CallbackPayload payload, SigningRequestEncodingOptions options) async {
     var request = SigningRequestManager.from(payload.req, options: options);
-    var abis = await request.fetchAbis();
+    var abis = await request.fetchAbis(abiProvider: options.abiProvider);
     return request.resolve(
         abis,
         Authorization()
