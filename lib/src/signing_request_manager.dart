@@ -439,7 +439,7 @@ class SigningRequestManager {
     return this.getRawActions().map((rawAction) {
       eosDart.Abi contractAbi;
       if (SigningRequestUtils.isIdentity(rawAction)) {
-        //TODO: check abi.data contractAbi = abi.data;
+        contractAbi = eosDart.Abi.fromJson(ESRConstants.signingRequestAbiType);
       } else {
         contractAbi = abis[rawAction.account];
       }
@@ -753,14 +753,22 @@ class ResolvedSigningRequest {
       CallbackPayload payload, SigningRequestEncodingOptions options) async {
     var request = SigningRequestManager.from(payload.req, options: options);
     var abis = await request.fetchAbis(abiProvider: options.abiProvider);
+
+    int refBlockNnum;
+    int refBlockPrefix;
+    try {
+      refBlockNnum = int.parse(payload.rbn);
+      refBlockPrefix = int.parse(payload.rid);
+    } catch (e) {}
+
     return request.resolve(
         abis,
         Authorization()
           ..actor = payload.sa
           ..permission = payload.sp,
         TransactionContext(
-            refBlockNnum: payload.rbn as int,
-            refBlockPrefix: payload.rid as int,
+            refBlockNnum: refBlockNnum ?? 0,
+            refBlockPrefix: refBlockPrefix ?? 0,
             expiration: DateTime.parse(payload.ex)));
   }
 
