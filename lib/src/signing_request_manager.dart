@@ -439,7 +439,7 @@ class SigningRequestManager {
     return this.getRawActions().map((rawAction) {
       eosDart.Abi contractAbi;
       if (SigningRequestUtils.isIdentity(rawAction)) {
-        contractAbi = eosDart.Abi.fromJson(ESRConstants.signingRequestAbiType);
+        contractAbi = ESRConstants.signingRequestAbi;
       } else {
         contractAbi = abis[rawAction.account];
       }

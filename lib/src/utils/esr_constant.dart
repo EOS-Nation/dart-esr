@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:dart_esr/src/models/authorization.dart';
-import 'package:dart_esr/src/signing_request_abi.dart';
+import 'package:dart_esr/src/signing_request_abi.dart' as abis;
 import 'package:eosdart/eosdart.dart' as eosDart;
 
 enum ChainName {
@@ -24,9 +24,11 @@ enum ChainName {
 class ESRConstants {
   static const int ProtocolVersion = 2;
 
+  static eosDart.Abi signingRequestAbi =
+      eosDart.Abi.fromJson(json.decode(abis.signingRequestAbi));
+
   static Map<String, eosDart.Type> signingRequestAbiType =
-      eosDart.getTypesFromAbi(eosDart.createInitialTypes(),
-          eosDart.Abi.fromJson(json.decode(signingRequestAbi)));
+      eosDart.getTypesFromAbi(eosDart.createInitialTypes(), signingRequestAbi);
 
   static const RequestFlagsNone = 0;
   static const RequestFlagsBroadcast = 1 << 0;
