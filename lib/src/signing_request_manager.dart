@@ -424,7 +424,7 @@ class SigningRequestManager {
   /** Resolve required ABI definitions. */
   Future<Map<String, dynamic>> fetchAbis({AbiProvider abiProvider}) async {
     var provider = abiProvider ?? this.abiProvider;
-    if (provider = null) {
+    if (provider == null) {
       throw 'Missing ABI provider';
     }
     const abis = <String, dynamic>{};
