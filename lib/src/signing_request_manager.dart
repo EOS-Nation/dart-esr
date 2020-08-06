@@ -570,12 +570,19 @@ class SigningRequestManager {
         var data =
             '0101000000000000000200000000000000'; // placeholder permission
         var authorization = [ESRConstants.PlaceholderAuth];
-        Identity req1 = req[1];
-        if (req1?.authorization != null) {
-          var buf = eosDart.SerialBuffer(Uint8List(0));
-          SigningRequestManager.idType.serialize(buf, req[1]);
-          data = eosDart.arrayToHex(buf.asUint8List());
-          authorization = [req1?.authorization];
+        var req1 = req[1];
+        if (req1['permission'] != null) {
+          var auth = Authorization()
+            ..actor =
+                req1['permission']['actor'] ?? ESRConstants.PlaceholderName
+            ..permission = req1['permission']['permission'] ??
+                ESRConstants.PlaceholderPermission;
+
+          var identity = Identity()..authorization = auth;
+
+          data = eosDart
+              .arrayToHex(identity.toBinary(SigningRequestManager.idType));
+          authorization = [auth];
         }
         return [
           Action()
