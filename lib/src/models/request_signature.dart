@@ -29,8 +29,15 @@ class RequestSignature {
     return buffer.asUint8List();
   }
 
-  factory RequestSignature.fromBinary(Type type, Uint8List data) {
-    var buffer = SerialBuffer(data);
+  factory RequestSignature.fromBinary(Type type, dynamic data) {
+    SerialBuffer buffer;
+    if (buffer is SerialBuffer) {
+      buffer = data;
+    } else if (buffer is Uint8List) {
+      buffer = SerialBuffer(data);
+    } else {
+      throw 'Data must be either Uint8List or SerialBuffer';
+    }
     var deserializedData =
         Map<String, dynamic>.from(type.deserialize(type, buffer));
     return RequestSignature.fromJson(deserializedData);

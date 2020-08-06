@@ -256,7 +256,7 @@ class SigningRequestManager {
 
   static SigningRequestManager fromData(Uint8List data,
       {SigningRequestEncodingOptions options}) {
-    var header = data[0];
+    var header = data.first;
     var version = header & ~(1 << 7);
     if (version != ESRConstants.ProtocolVersion) {
       throw 'Unsupported protocol version';
@@ -274,15 +274,24 @@ class SigningRequestManager {
     var textDecoder =
         options.textDecoder ?? defaultSigningRequestEncodingOptions.textDecoder;
 
-    var req = SigningRequest.fromBinary(type, data);
+    var buf = eosDart.SerialBuffer(array);
+
+    var signingRequest = SigningRequest.fromBinary(type, buf);
+
+    if (signingRequest.req.first == 'identity' &&
+        signingRequest.req[1]['permission'] == null) {
+      signingRequest.req[1]['permission'] =
+          ESRConstants.PlaceholderAuth.toJson();
+    }
 
     RequestSignature signature;
-    try {
+    if (buf.haveReadData()) {
       signature = RequestSignature.fromBinary(
-          ESRConstants.signingRequestAbiType['request_signature'], data);
-    } catch (e) {}
+          ESRConstants.signingRequestAbiType['request_signature'], buf);
+    }
 
-    return SigningRequestManager(version, req, textEncoder, textDecoder,
+    return SigningRequestManager(
+        version, signingRequest, textEncoder, textDecoder,
         zlib: options.zlib,
         abiProvider: options.abiProvider,
         signature: signature);
@@ -384,10 +393,7 @@ class SigningRequestManager {
 
   /** Get the request data without header or signature. */
   Uint8List getData() {
-    // var buffer = eosDart.SerialBuffer(Uint8List(0));
-    // SigningRequest.type.serialize(buffer, this.data);
     return this.data.toBinary(SigningRequestManager.type);
-    // return buffer.asUint8List();
   }
 
   /** Get signature data, returns an empty array if request is not signed. */
