@@ -56,6 +56,7 @@ class SigningRequestManager {
   static Future<SigningRequestManager> create(
     SigningRequestCreateArguments args, {
     SigningRequestEncodingOptions options,
+    //TODO replace with abiprovider
     EOSSerializeUtils serializeUtils,
   }) async {
     if (options == null) {
@@ -462,7 +463,8 @@ class SigningRequestManager {
           }
         };
       }
-
+      //TODO use abiprovider
+      serializeUtils = EOSSerializeUtils('https://jungle.greymass.com', 'v1');
       //TODO: use deserializeAction from eosDart
       var action = serializeUtils.deserializeAction(
           contract,
@@ -789,7 +791,7 @@ class SigningRequestUtils {
   static eosDart.Contract getContract(eosDart.Abi contractAbi) {
     var types =
         eosDart.getTypesFromAbi(eosDart.createInitialTypes(), contractAbi);
-    const actions = <String, eosDart.Type>{};
+    var actions = <String, eosDart.Type>{};
 
     contractAbi.actions.forEach((action) {
       actions[action.name] = eosDart.getType(types, action.type);
@@ -798,9 +800,13 @@ class SigningRequestUtils {
     return eosDart.Contract(types, actions);
   }
 
-  Future<void> serializeAction() async {
-    //TODO: SigningRequestUtils.serializeAction 'not implemented yet' use serialize Utils
-    throw 'not implemented yet';
+  //TODO use abiprovider
+  Future<void> serializeAction(Action action,
+      {AbiProvider abiProvider, String nodeUrl, String nodeVersion}) async {
+    if (!action.data is String) {
+      EOSSerializeUtils(nodeUrl, nodeVersion).serializeActions([action]);
+    }
+    return action;
   }
 
   /**
