@@ -615,7 +615,7 @@ class SigningRequestManager {
   }
 
   /** Whether the request is an identity request. */
-  isIdentity() {
+  bool isIdentity() {
     return this.data.req[0] == 'identity';
   }
 
