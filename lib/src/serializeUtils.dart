@@ -6,6 +6,7 @@ import 'package:dart_esr/src/utils/esr_constant.dart';
 import 'package:dart_esr/src/encoding_options.dart';
 import 'package:dart_esr/src/models/action.dart';
 import 'package:dart_esr/src/models/authorization.dart';
+import 'package:dart_esr/src/models/identity.dart';
 import 'package:dart_esr/src/models/transaction.dart';
 
 import 'package:eosdart/eosdart.dart' as eosDart;
@@ -66,12 +67,14 @@ class EOSSerializeUtils {
     if (action == null) {
       throw 'Unknown action ${name} in contract ${account}';
     }
-    //TODO. deserialize action data doubt it work because same code did not work in other places
-    // var buffer = eosDart.SerialBuffer(data);
-    // // buffer.pushArray(data as Uint8List);
-    // return action.deserialize(ESRConstants.signingRequestAbiType, buffer);
+
+    if (account.isEmpty && name == 'identity') {
+      return Identity.fromBinary(
+          ESRConstants.signingRequestAbiType['signing_request'], data);
+    }
+
     return Action.fromBinary(
-        ESRConstants.signingRequestAbiType['action'], data);
+        ESRConstants.signingRequestAbiType['signing_request'], data);
   }
 
   //TODO: Move to eosDart serialize
