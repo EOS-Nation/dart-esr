@@ -70,11 +70,11 @@ class EOSSerializeUtils {
 
     if (account.isEmpty && name == 'identity') {
       return Identity.fromBinary(
-          ESRConstants.signingRequestAbiType['signing_request'], data);
+          ESRConstants.signingRequestAbiType['identity'], data);
     }
 
     return Action.fromBinary(
-        ESRConstants.signingRequestAbiType['signing_request'], data);
+        ESRConstants.signingRequestAbiType['action'], data);
   }
 
   //TODO: Move to eosDart serialize

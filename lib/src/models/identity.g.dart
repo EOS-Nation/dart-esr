@@ -7,7 +7,9 @@ part of 'identity.dart';
 // **************************************************************************
 
 Identity _$IdentityFromJson(Map<String, dynamic> json) {
-  return Identity()..authorization = Authorization.fromJson(json['permission']);
+  return Identity()
+    ..authorization =
+        Authorization.fromJson(Map<String, dynamic>.from(json['permission']));
 }
 
 Map<String, dynamic> _$IdentityToJson(Identity instance) => <String, dynamic>{
