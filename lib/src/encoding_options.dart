@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:dart_esr/src/models/request_signature.dart';
+import 'package:eosdart/eosdart.dart' as eosDart;
 
 SigningRequestEncodingOptions defaultSigningRequestEncodingOptions =
     SigningRequestEncodingOptions(
@@ -41,7 +42,7 @@ class DefaultTextEncoder implements TextEncoder {
 class DefaultTextDecoder implements TextDecoder {
   @override
   String decode(Uint8List input) {
-    return utf8.decode(input);
+    return eosDart.arrayToHex(input);
   }
 }
 

@@ -40,14 +40,21 @@ class EOSSerializeUtils {
     for (Action action in actions) {
       String account = action.account;
 
-      var contract = await this.getContract(account);
+      if (account.isEmpty &&
+          action.name == 'identity' &&
+          action.data is Identity) {
+        action.data = (action.data as Identity)
+            .toBinary(ESRConstants.signingRequestAbiType['identity']);
+      } else {
+        var contract = await this.getContract(account);
 
-      action.data = this._serializeActionData(
-        contract,
-        account,
-        action.name,
-        action.data,
-      );
+        action.data = this._serializeActionData(
+          contract,
+          account,
+          action.name,
+          action.data,
+        );
+      }
     }
   }
 

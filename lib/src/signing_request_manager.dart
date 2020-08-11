@@ -519,11 +519,10 @@ class SigningRequestManager {
   ResolvedSigningRequest resolve(
       Map<String, dynamic> abis, Authorization signer, TransactionContext ctx) {
     var transaction = this.resolveTransaction(abis, signer, ctx);
-    var buf = eosDart.SerialBuffer(Uint8List(0));
 
     serializeUtils.serializeActions(transaction.actions);
-    SigningRequestManager.transactionType.serialize(buf, transaction);
-    var serializedTransaction = buf.asUint8List();
+    var serializedTransaction =
+        transaction.toBinary(SigningRequestManager.transactionType);
 
     return ResolvedSigningRequest(
         this, signer, transaction, serializedTransaction);
