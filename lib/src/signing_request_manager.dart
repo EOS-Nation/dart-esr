@@ -188,10 +188,6 @@ class SigningRequestManager {
         ? args.permission
         : ESRConstants.PlaceholderName;
 
-    if (permission.actor == ESRConstants.PlaceholderName &&
-        permission.permission == ESRConstants.PlaceholderPermission) {
-      permission = null;
-    }
     var createArgs = SigningRequestCreateArguments(
         chainId: args.chainId,
         identity: Identity()..authorization = permission,
@@ -853,6 +849,6 @@ class SigningRequestUtils {
     if (ESRConstants.ChainIdLookup.containsKey(chainName)) {
       return ESRConstants.ChainIdLookup[chainName];
     }
-    return ESRConstants.ChainIdLookup[ChainName.UNKNOWN];
+    return ESRConstants.ChainIdLookup[ChainName.RESERVED];
   }
 }

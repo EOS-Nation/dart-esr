@@ -5,7 +5,7 @@ import 'package:dart_esr/src/signing_request_abi.dart' as abis;
 import 'package:eosdart/eosdart.dart' as eosDart;
 
 enum ChainName {
-  UNKNOWN,
+  RESERVED,
   EOS,
   EOS_JUNGLE2,
   TELOS,
@@ -41,17 +41,13 @@ class ESRConstants {
     ..actor = PlaceholderName
     ..permission = PlaceholderPermission;
 
-  static getChainAlias(ChainName name) {
-    return name.index + 1;
-  }
+  static getChainAlias(ChainName name) => name.index;
 
   static final Map<ChainName, String> ChainIdLookup = {
-    ChainName.UNKNOWN:
+    ChainName.RESERVED:
         '0000000000000000000000000000000000000000000000000000000000000000',
     ChainName.EOS:
         'aca376f206b8fc25a6ed44dbdc66547c36c6c33e3a119ffbeaef943642f0e906',
-    ChainName.EOS_JUNGLE2:
-        'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
     ChainName.TELOS:
         '4667b205c6838ef70ff7988f6e8257e8be0e1284a2f59699054a018f743b1d11',
     ChainName.JUNGLE:
