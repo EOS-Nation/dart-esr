@@ -168,9 +168,26 @@ class EOSNode {
 
   /// Get EOS raw abi from account name
   Future<eosDart.AbiResp> getRawAbi(String accountName) async {
-    return this
-        ._post('/chain/get_raw_abi', {'account_name': accountName}).then((abi) {
-      return eosDart.AbiResp.fromJson(abi);
+    var rawAbi =
+        await this._post('/chain/get_raw_abi', {'account_name': accountName});
+    return eosDart.AbiResp.fromJson(rawAbi);
+  }
+
+  /// Get EOS abi from account name
+  Future<eosDart.AbiResp> getAbi(String accountName) async {
+    var abi = await this._post('/chain/get_abi', {'account_name': accountName});
+    return eosDart.AbiResp.fromJson(abi);
+  }
+
+  /// Push transaction to EOS chain
+  Future<dynamic> pushTransaction(
+      eosDart.PushTransactionArgs pushTransactionArgs) async {
+    return this._post('/chain/push_transaction', {
+      'signatures': pushTransactionArgs.signatures,
+      'compression': 0,
+      'packed_context_free_data': '',
+      'packed_trx':
+          eosDart.arrayToHex(pushTransactionArgs.serializedTransaction),
     });
   }
 }

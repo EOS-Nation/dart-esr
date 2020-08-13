@@ -878,7 +878,7 @@ class SigningRequestUtils {
   }
 
   static bool hasTapos(Transaction tx) {
-    return !(tx.expiration == '1970-01-01T00:00:00.000' &&
+    return !(tx.expiration == DateTime.parse('1970-01-01T00:00:00.000') &&
         tx.refBlockNum == 0 &&
         tx.refBlockPrefix == 0);
   }
