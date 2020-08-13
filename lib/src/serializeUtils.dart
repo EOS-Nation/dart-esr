@@ -77,7 +77,8 @@ class EOSSerializeUtils {
           ESRConstants.signingRequestAbiType['identity'], data);
     }
 
-    return Action.fromBinary(action, data);
+    var buffer = eosDart.SerialBuffer(data);
+    return action.deserialize(action, buffer);
   }
 
   //TODO: Move to eosDart serialize
