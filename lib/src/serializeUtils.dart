@@ -31,30 +31,27 @@ class EOSSerializeUtils {
         await eosNode.getBlock((info.headBlockNum - blocksBehind).toString());
 
     await this._fullFill(transaction, refBlock);
-    await this.serializeActions(transaction.actions);
+    await Future.forEach(transaction.actions, (action) async {
+      var contract = await this.getContract(action.account);
+      this.serializeActions(contract, action);
+    });
     return transaction;
   }
 
   /// serialize actions in a transaction
-  void serializeActions(List<Action> actions) async {
-    for (Action action in actions) {
-      String account = action.account;
-
-      if (account.isEmpty &&
-          action.name == 'identity' &&
-          action.data is Identity) {
-        action.data = (action.data as Identity)
-            .toBinary(ESRConstants.signingRequestAbiType['identity']);
-      } else {
-        var contract = await this.getContract(account);
-
-        action.data = this._serializeActionData(
-          contract,
-          account,
-          action.name,
-          action.data,
-        );
-      }
+  void serializeActions(eosDart.Contract contract, Action action) async {
+    if (action.account.isEmpty &&
+        action.name == 'identity' &&
+        action.data is Identity) {
+      action.data = (action.data as Identity)
+          .toBinary(ESRConstants.signingRequestAbiType['identity']);
+    } else {
+      action.data = this._serializeActionData(
+        contract,
+        action.account,
+        action.name,
+        action.data,
+      );
     }
   }
 
@@ -80,8 +77,7 @@ class EOSSerializeUtils {
           ESRConstants.signingRequestAbiType['identity'], data);
     }
 
-    return Action.fromBinary(
-        ESRConstants.signingRequestAbiType['action'], data);
+    return Action.fromBinary(action, data);
   }
 
   //TODO: Move to eosDart serialize

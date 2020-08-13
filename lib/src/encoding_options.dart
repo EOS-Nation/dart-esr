@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:dart_esr/src/models/request_signature.dart';
+import 'package:dart_esr/src/serializeUtils.dart';
 import 'package:eosdart/eosdart.dart' as eosDart;
 
 SigningRequestEncodingOptions defaultSigningRequestEncodingOptions =
@@ -26,9 +27,10 @@ class DefaultZlibProvider implements ZlibProvider {
 
 class DefaultAbiProvider implements AbiProvider {
   @override
-  Future getAbi(String account) {
-    // TODO: DefaultAbiProvider.getAbi 'not implemented yet'
-    throw UnimplementedError();
+  Future getAbi(String account) async {
+    var abiResp =
+        await EOSNode('https://jungle.greymass.com', 'v1').getRawAbi(account);
+    return abiResp.abi;
   }
 }
 

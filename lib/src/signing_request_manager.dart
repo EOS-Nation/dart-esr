@@ -9,8 +9,8 @@ import 'package:dart_esr/src/models/info_pair.dart';
 import 'package:dart_esr/src/models/request_signature.dart';
 import 'package:dart_esr/src/models/signing_request.dart';
 import 'package:dart_esr/src/models/transaction.dart';
-
 import 'package:dart_esr/src/serializeUtils.dart';
+
 import 'package:dart_esr/src/utils/base64u.dart';
 import 'package:dart_esr/src/utils/esr_constant.dart';
 
@@ -24,8 +24,6 @@ class SigningRequestManager {
   static eosDart.Type idType = ESRConstants.signingRequestAbiType['identity'];
   static eosDart.Type transactionType =
       ESRConstants.signingRequestAbiType['transaction'];
-
-  EOSSerializeUtils serializeUtils;
 
   int version;
   SigningRequest data;
@@ -56,8 +54,6 @@ class SigningRequestManager {
   static Future<SigningRequestManager> create(
     SigningRequestCreateArguments args, {
     SigningRequestEncodingOptions options,
-    //TODO replace with abiprovider
-    EOSSerializeUtils serializeUtils,
   }) async {
     if (options == null) {
       options = defaultSigningRequestEncodingOptions;
@@ -76,13 +72,15 @@ class SigningRequestManager {
     } else if (args.action != null &&
         args.actions == null &&
         args.transaction == null) {
-      await serializeUtils.serializeActions([args.action]);
+      await SigningRequestUtils.serializeAction(args.action,
+          abiProvider: options.abiProvider);
 
       data.req = ['action', args.action.toJson()];
     } else if (args.actions != null &&
         args.action == null &&
         args.transaction == null) {
-      await serializeUtils.serializeActions(args.actions);
+      await SigningRequestUtils.serializeActions(args.actions,
+          abiProvider: options.abiProvider);
 
       var jsonAction = [];
       for (var action in args.actions) {
@@ -125,7 +123,8 @@ class SigningRequestManager {
       }
 
       // encode actions if needed
-      await serializeUtils.serializeActions(tx.actions);
+      await SigningRequestUtils.serializeActions(tx.actions,
+          abiProvider: options.abiProvider);
       data.req = ['transaction', tx.toJson()];
     } else {
       throw 'Invalid arguments: Must have exactly one of action, actions or transaction';
@@ -178,8 +177,7 @@ class SigningRequestManager {
   /** Creates an identity request. */
   static Future<SigningRequestManager> identity(
       SigningRequestCreateIdentityArguments args,
-      {SigningRequestEncodingOptions options,
-      EOSSerializeUtils serializeUtils}) async {
+      {SigningRequestEncodingOptions options}) async {
     var permission = Authorization();
     permission.actor = args.account != null || args.account.isEmpty
         ? args.account
@@ -418,7 +416,7 @@ class SigningRequestManager {
     if (provider == null) {
       throw 'Missing ABI provider';
     }
-    const abis = <String, dynamic>{};
+    var abis = <String, dynamic>{};
 
     await Future.forEach(this.getRequiredAbis(), (account) async {
       abis[account] = await provider.getAbi(account);
@@ -445,10 +443,13 @@ class SigningRequestManager {
       }
       var contract = SigningRequestUtils.getContract(contractAbi);
 
+      //TODO check purpose cause problem deserialing action
       if (signer != null) {
         // hook into eosjs name decoder and return the signing account if we encounter the placeholder
         // this is fine because getContract re-creates the initial types each time
-        contract.types['name']?.deserialize = (eosDart.SerialBuffer buffer) {
+        contract.types['name']?.deserialize =
+            (eosDart.Type type, eosDart.SerialBuffer buffer,
+                {bool allowExtensions, eosDart.SerializerState state}) {
           var name = buffer.getName();
           if (name == ESRConstants.PlaceholderName) {
             return signer.actor;
@@ -459,10 +460,9 @@ class SigningRequestManager {
           }
         };
       }
-      //TODO use abiprovider
-      serializeUtils = EOSSerializeUtils('https://jungle.greymass.com', 'v1');
+
       //TODO: use deserializeAction from eosDart
-      var action = serializeUtils.deserializeAction(
+      var action = SigningRequestUtils.deserializeAction(
           contract,
           rawAction.account,
           rawAction.name,
@@ -483,7 +483,6 @@ class SigningRequestManager {
           if (auth.permission == ESRConstants.PlaceholderName) {
             auth.permission = signer.permission;
           }
-          return [auth];
         });
       }
       return action;
@@ -498,8 +497,8 @@ class SigningRequestManager {
           ctx.refBlockNnum != null &&
           ctx.refBlockPrefix != null) {
         tx.expiration = ctx.expiration;
-        tx.ref_block_num = ctx.refBlockNnum;
-        tx.ref_block_prefix = ctx.refBlockPrefix;
+        tx.refBlockNum = ctx.refBlockNnum;
+        tx.refBlockPrefix = ctx.refBlockPrefix;
       } else if (ctx.blockNum != null &&
           ctx.refBlockPrefix != null &&
           ctx.timestamp != null) {
@@ -520,7 +519,19 @@ class SigningRequestManager {
       Map<String, dynamic> abis, Authorization signer, TransactionContext ctx) {
     var transaction = this.resolveTransaction(abis, signer, ctx);
 
-    serializeUtils.serializeActions(transaction.actions);
+    transaction.actions.forEach((action) {
+      var contractAbi;
+      if (SigningRequestUtils.isIdentity(action)) {
+        contractAbi = ESRConstants.signingRequestAbi;
+      } else {
+        contractAbi = abis[action.account];
+      }
+      if (contractAbi == null) {
+        throw 'Missing ABI definition for ${action.account}';
+      }
+      SigningRequestUtils.serializeAction(action, abi: contractAbi);
+    });
+
     var serializedTransaction =
         transaction.toBinary(SigningRequestManager.transactionType);
 
@@ -554,8 +565,9 @@ class SigningRequestManager {
     var req = this.data.req;
     switch (req[0]) {
       case 'action':
-        return [req[1]];
+        return [Action.fromJson(Map<String, dynamic>.from(req[1]))];
       case 'action[]':
+        //TODO return list of actions
         return req[1];
       case 'identity':
         var data =
@@ -590,7 +602,7 @@ class SigningRequestManager {
   }
 
   /** Unresolved transaction. */
-  getRawTransaction() {
+  Transaction getRawTransaction() {
     var req = this.data.req;
     switch (req[0]) {
       case 'transaction':
@@ -796,12 +808,48 @@ class SigningRequestUtils {
   }
 
   //TODO use abiprovider
-  Future<void> serializeAction(Action action,
-      {AbiProvider abiProvider, String nodeUrl, String nodeVersion}) async {
-    if (!action.data is String) {
-      EOSSerializeUtils(nodeUrl, nodeVersion).serializeActions([action]);
+  static Future<void> serializeActions(List<Action> actions,
+      {AbiProvider abiProvider}) async {
+    await Future.forEach(
+        actions,
+        (action) => SigningRequestUtils.serializeAction(action,
+            abiProvider: abiProvider));
+  }
+
+  //TODO use abiprovider
+  static Future<void> serializeAction(Action action,
+      {eosDart.Abi abi, AbiProvider abiProvider}) async {
+    if (action.data is String) {
+      return;
     }
-    return action;
+    var contractAbi;
+    if (abi != null) {
+      contractAbi = abi;
+    } else if (SigningRequestUtils.isIdentity(action)) {
+      contractAbi = ESRConstants.signingRequestAbi;
+    } else if (abiProvider != null) {
+      contractAbi = await abiProvider.getAbi(action.account);
+    }
+    if (contractAbi == null) {
+      throw 'Missing abi provider';
+    }
+    var contract = SigningRequestUtils.getContract(contractAbi);
+    EOSSerializeUtils('https://jungle.greymass.com', 'v1')
+        .serializeActions(contract, action);
+  }
+
+  //TODO use abiprovider
+  static Action deserializeAction(
+      eosDart.Contract contract,
+      String account,
+      String name,
+      List<Authorization> authorization,
+      dynamic data,
+      TextEncoder textEncoder,
+      TextDecoder textDecoder) {
+    return EOSSerializeUtils('https://jungle.greymass.com', 'v1')
+        .deserializeAction(contract, account, name, authorization, data,
+            textEncoder, textDecoder);
   }
 
   /**

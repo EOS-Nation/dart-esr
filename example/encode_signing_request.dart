@@ -2,15 +2,14 @@ import 'package:dart_esr/src/encoding_options.dart';
 import 'package:dart_esr/src/models/action.dart';
 import 'package:dart_esr/src/models/authorization.dart';
 import 'package:dart_esr/src/models/transaction.dart';
-import 'package:dart_esr/src/serializeUtils.dart';
 import 'package:dart_esr/src/signing_request_interface.dart';
 import 'package:dart_esr/src/signing_request_manager.dart';
 import 'package:dart_esr/src/utils/esr_constant.dart';
 
 main(List<String> args) async {
-  // transactionTest();
-  // actionTest();
-  // actionsTest();
+  transactionTest();
+  actionTest();
+  actionsTest();
   identityTest();
   // desezialize();
 }
@@ -24,7 +23,6 @@ void desezialize() {
 }
 
 Future<void> actionTest() async {
-  var esr = EOSSerializeUtils('https://jungle2.cryptolions.io', 'v1');
   var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
   var data = <String, String>{'name': 'data'};
@@ -42,15 +40,13 @@ Future<void> actionTest() async {
       info: {'key': 'sctfgkhlkjnlm'});
   SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
 
-  var request = await SigningRequestManager.create(args,
-      options: options, serializeUtils: esr);
+  var request = await SigningRequestManager.create(args, options: options);
 
   var uri = request.encode();
   print(uri);
 }
 
 Future<void> actionsTest() async {
-  var esr = EOSSerializeUtils('https://jungle2.cryptolions.io', 'v1');
   var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
   var data = <String, String>{'name': 'data'};
@@ -79,16 +75,13 @@ Future<void> actionsTest() async {
   );
   SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
 
-  var request = await SigningRequestManager.create(args,
-      options: options, serializeUtils: esr);
+  var request = await SigningRequestManager.create(args, options: options);
 
   var uri = request.encode();
   print(uri);
 }
 
 Future<void> identityTest() async {
-  var esr = EOSSerializeUtils('https://jungle2.cryptolions.io', 'v1');
-
   var callback = CallbackType('asdf', true);
   var args = SigningRequestCreateIdentityArguments(callback,
       chainId:
@@ -98,8 +91,7 @@ Future<void> identityTest() async {
 
   SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
 
-  var idReq = await SigningRequestManager.identity(args,
-      options: options, serializeUtils: esr);
+  var idReq = await SigningRequestManager.identity(args, options: options);
 
   // encode signing request as URI string
   var uri = idReq.encode();
@@ -107,7 +99,6 @@ Future<void> identityTest() async {
 }
 
 Future<void> transactionTest() async {
-  var esr = EOSSerializeUtils('https://jungle2.cryptolions.io', 'v1');
   var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
   var data = <String, String>{'name': 'data'};
@@ -128,8 +119,7 @@ Future<void> transactionTest() async {
   );
   SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
 
-  var request = await SigningRequestManager.create(args,
-      options: options, serializeUtils: esr);
+  var request = await SigningRequestManager.create(args, options: options);
 
   var uri = request.encode();
   print(uri);
