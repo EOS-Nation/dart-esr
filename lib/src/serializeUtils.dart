@@ -166,6 +166,13 @@ class EOSNode {
     return eosDart.Block.fromJson(block);
   }
 
+  /// Get EOS account info form the given account name
+  Future<eosDart.Account> getAccount(String accountName) async {
+    var account =
+        await this._post('/chain/get_account', {'account_name': accountName});
+    return eosDart.Account.fromJson(account);
+  }
+
   /// Get EOS raw abi from account name
   Future<eosDart.AbiResp> getRawAbi(String accountName) async {
     var rawAbi =
