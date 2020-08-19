@@ -56,14 +56,12 @@ class SigningRequestManager {
     SigningRequestEncodingOptions options,
   }) async {
     if (options == null) {
-      options = defaultSigningRequestEncodingOptions;
+      options = defaultSigningRequestEncodingOptions();
     }
-    TextEncoder textEncoder = options.textEncoder != null
-        ? options.textEncoder
-        : defaultSigningRequestEncodingOptions.textEncoder;
-    TextDecoder textDecoder = options.textDecoder != null
-        ? options.textDecoder
-        : defaultSigningRequestEncodingOptions.textDecoder;
+    TextEncoder textEncoder =
+        options.textEncoder != null ? options.textEncoder : DefaultTextEncoder;
+    TextDecoder textDecoder =
+        options.textDecoder != null ? options.textDecoder : TextDecoder;
 
     var data = SigningRequest();
     // set the request data
@@ -264,10 +262,8 @@ class SigningRequestManager {
       array = options.zlib.inflateRaw(array);
     }
 
-    var textEncoder =
-        options.textEncoder ?? defaultSigningRequestEncodingOptions.textEncoder;
-    var textDecoder =
-        options.textDecoder ?? defaultSigningRequestEncodingOptions.textDecoder;
+    var textEncoder = options.textEncoder ?? DefaultTextEncoder;
+    var textDecoder = options.textDecoder ?? DefaultTextDecoder;
 
     var buf = eosDart.SerialBuffer(array);
 
@@ -430,7 +426,6 @@ class SigningRequestManager {
    * @param signer Placeholders in actions will be resolved to signer if set.
    */
   List<Action> resolveActions(Map<String, dynamic> abis, Authorization signer) {
-    //TODO: check deserialization
     return this.getRawActions().map((rawAction) {
       eosDart.Abi contractAbi;
       if (SigningRequestUtils.isIdentity(rawAction)) {
@@ -443,7 +438,6 @@ class SigningRequestManager {
       }
       var contract = SigningRequestUtils.getContract(contractAbi);
 
-      //TODO check purpose cause problem deserialing action
       if (signer != null) {
         // hook into eosjs name decoder and return the signing account if we encounter the placeholder
         // this is fine because getContract re-creates the initial types each time
@@ -461,7 +455,6 @@ class SigningRequestManager {
         };
       }
 
-      //TODO: use deserializeAction from eosDart
       var action = SigningRequestUtils.deserializeAction(
           contract,
           rawAction.account,
@@ -789,7 +782,7 @@ class ResolvedSigningRequest {
   }
 
   ResolvedCallback getCallback(List<String> signatures, {int blockNum}) {
-    //TODO: SigningRequestUtils.serializeAction 'not implemented yet' use serialize Utils
+    //TODO: ResolvedSigningRequest getCallback 'not implemented yet'
     throw 'not implemented yet';
   }
 }
@@ -807,7 +800,6 @@ class SigningRequestUtils {
     return eosDart.Contract(types, actions);
   }
 
-  //TODO use abiprovider
   static Future<void> serializeActions(List<Action> actions,
       {AbiProvider abiProvider}) async {
     await Future.forEach(
@@ -816,7 +808,6 @@ class SigningRequestUtils {
             abiProvider: abiProvider));
   }
 
-  //TODO use abiprovider
   static Future<void> serializeAction(Action action,
       {eosDart.Abi abi, AbiProvider abiProvider}) async {
     if (action.data is String) {
@@ -834,11 +825,9 @@ class SigningRequestUtils {
       throw 'Missing abi provider';
     }
     var contract = SigningRequestUtils.getContract(contractAbi);
-    EOSSerializeUtils('https://jungle.greymass.com', 'v1')
-        .serializeActions(contract, action);
+    EOSSerializeUtils.serializeActions(contract, action);
   }
 
-  //TODO use abiprovider
   static Action deserializeAction(
       eosDart.Contract contract,
       String account,
@@ -847,9 +836,8 @@ class SigningRequestUtils {
       dynamic data,
       TextEncoder textEncoder,
       TextDecoder textDecoder) {
-    return EOSSerializeUtils('https://jungle.greymass.com', 'v1')
-        .deserializeAction(contract, account, name, authorization, data,
-            textEncoder, textDecoder);
+    return EOSSerializeUtils.deserializeAction(
+        contract, account, name, authorization, data, textEncoder, textDecoder);
   }
 
   /**

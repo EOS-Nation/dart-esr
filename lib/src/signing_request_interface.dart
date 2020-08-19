@@ -100,7 +100,6 @@ class CallbackPayload {
   /** All signatures 0-indexed as `sig0`, `sig1`, etc. */
   Map<String, String> signatures;
 
-  //TODO check if good place
   String linkKey;
   String linkName;
   String linkCh;

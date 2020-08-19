@@ -14,7 +14,6 @@ Action _$ActionFromJson(Map<String, dynamic> json) {
         ?.map((e) => e == null
             ? null
             : Authorization.fromJson(Map<String, dynamic>.from(e)))
-        //TODO check why "as Map" does not work
         ?.toList()
     ..data = json['data'];
 }

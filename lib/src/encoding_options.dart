@@ -3,15 +3,16 @@ import 'dart:typed_data';
 
 import 'package:archive/archive_io.dart';
 import 'package:dart_esr/src/models/request_signature.dart';
-import 'package:dart_esr/src/serializeUtils.dart';
 import 'package:eosdart/eosdart.dart' as eosDart;
 
-SigningRequestEncodingOptions defaultSigningRequestEncodingOptions =
+SigningRequestEncodingOptions defaultSigningRequestEncodingOptions(
+        {String nodeUrl = 'https://eos.greymass.com',
+        String nodeVersion = 'v1'}) =>
     SigningRequestEncodingOptions(
         textEncoder: DefaultTextEncoder(),
         textDecoder: DefaultTextDecoder(),
         zlib: DefaultZlibProvider(),
-        abiProvider: DefaultAbiProvider());
+        abiProvider: DefaultAbiProvider(nodeUrl, nodeVersion: nodeVersion));
 
 class DefaultZlibProvider implements ZlibProvider {
   @override
@@ -26,10 +27,15 @@ class DefaultZlibProvider implements ZlibProvider {
 }
 
 class DefaultAbiProvider implements AbiProvider {
+  eosDart.EOSClient client;
+
+  DefaultAbiProvider(String nodeUrl, {String nodeVersion = 'v1'}) {
+    client = eosDart.EOSClient(nodeUrl, nodeVersion);
+  }
+
   @override
   Future getAbi(String account) async {
-    var abiResp =
-        await EOSNode('https://jungle.greymass.com', 'v1').getRawAbi(account);
+    var abiResp = await client.getRawAbi(account);
     return abiResp.abi;
   }
 }

@@ -11,15 +11,17 @@ main(List<String> args) async {
   actionTest();
   actionsTest();
   identityTest();
-  // desezialize();
+  desezialize();
 }
 
 void desezialize() {
   var uri =
       "esr://gmN8zrVqx8w62T9P-_evaTi9u__Nm-qZ52doTXFRt9mTckSkmJmByTqjpKSg2EpfPzlJLzEvOSO_SC8nMy9b39zAzCIx2dJM18gs0VLXxNQwRTfRwtxA1zgpMdXM3MzQwtTQkpkFpFSLgYHB4aiWbzgDk1Zw_ObTlU85c7s4MpfmSx3-q3BJxkpY9A_f6Qv8f9b9b-AuTsxNjU9JLctMTmVk5C5KLSktyosvSCzJCE_LzEkFukI_Iz83Vb8gMTlf3yU_uTQ3Na-kWB-oQT-9KLUyN7G4WB_iSF2wI1MrEnMLclKL9XPy0zPz9DPzUlIr9DJKcnOUDXPTAnz9PfIA";
   var w = SigningRequestManager.from(uri,
-      options: defaultSigningRequestEncodingOptions);
-  print(w.toString());
+      options: defaultSigningRequestEncodingOptions(
+          nodeUrl: 'https://jungle.greymass.com'));
+
+  print('desezialize\n' + w.toString());
 }
 
 Future<void> actionTest() async {
@@ -38,12 +40,16 @@ Future<void> actionTest() async {
       chainId:
           'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
       info: {'key': 'sctfgkhlkjnlm'});
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://jungle.greymass.com');
 
-  var request = await SigningRequestManager.create(args, options: options);
-
-  var uri = request.encode();
-  print(uri);
+  try {
+    var request = await SigningRequestManager.create(args, options: options);
+    var uri = request.encode();
+    print('action\n' + uri);
+  } catch (e) {
+    print(e.toString());
+  }
 }
 
 Future<void> actionsTest() async {
@@ -73,12 +79,16 @@ Future<void> actionsTest() async {
     actions: [action, action2, action3],
     chainId: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
   );
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://jungle.greymass.com');
 
-  var request = await SigningRequestManager.create(args, options: options);
-
-  var uri = request.encode();
-  print(uri);
+  try {
+    var request = await SigningRequestManager.create(args, options: options);
+    var uri = request.encode();
+    print('actions\n' + uri);
+  } catch (e) {
+    print(e.toString());
+  }
 }
 
 Future<void> identityTest() async {
@@ -89,13 +99,18 @@ Future<void> identityTest() async {
       account: ESRConstants.PlaceholderName,
       permission: ESRConstants.PlaceholderPermission);
 
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://jungle.greymass.com');
 
-  var idReq = await SigningRequestManager.identity(args, options: options);
+  try {
+    var idReq = await SigningRequestManager.identity(args, options: options);
 
-  // encode signing request as URI string
-  var uri = idReq.encode();
-  print(uri);
+    // encode signing request as URI string
+    var uri = idReq.encode();
+    print('identity\n' + uri);
+  } catch (e) {
+    print(e.toString());
+  }
 }
 
 Future<void> transactionTest() async {
@@ -117,10 +132,15 @@ Future<void> transactionTest() async {
     transaction: transaction,
     chainId: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
   );
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions;
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://jungle.greymass.com');
 
-  var request = await SigningRequestManager.create(args, options: options);
+  try {
+    var request = await SigningRequestManager.create(args, options: options);
 
-  var uri = request.encode();
-  print(uri);
+    var uri = request.encode();
+    print('transaction\n' + uri);
+  } catch (e) {
+    print(e.toString());
+  }
 }
