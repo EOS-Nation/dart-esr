@@ -107,6 +107,8 @@ abstract class AbiProvider {
 
 /** Interface that should be implemented by signature providers. */
 abstract class SignatureProvider {
+  /** Public keys associated with the private keys that the `SignatureProvider` holds */
+  Future<String> getAvailableKeys;
   /** Sign 32-byte hex-encoded message and return signer name and signature string. */
   RequestSignature sign(String message);
 }
