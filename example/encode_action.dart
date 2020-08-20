@@ -5,26 +5,28 @@ main(List<String> args) => actionExample();
 Future<void> actionExample() async {
   var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
-  var data = <String, String>{'name': 'data'};
+  var data = <String, dynamic>{
+    'voter': ESRConstants.PlaceholderName,
+    'proxy': 'eosnationftw',
+    'producers': [],
+  };
 
   var action = Action()
-    ..account = 'eosnpingpong'
-    ..name = 'ping'
+    ..account = 'eosio'
+    ..name = 'voteproducer'
     ..authorization = auth
     ..data = data;
 
   var args = SigningRequestCreateArguments(
-      action: action,
-      chainId: ESRConstants.ChainIdLookup[ChainName.EOS_JUNGLE2],
-      info: {'key': 'sctfgkhlkjnlm'});
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
-      nodeUrl: 'https://jungle.greymass.com');
+    action: action,
+    chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+  );
 
-  try {
-    var request = await SigningRequestManager.create(args, options: options);
-    var uri = request.encode();
-    print('action\n' + uri);
-  } catch (e) {
-    print(e.toString());
-  }
+  SigningRequestEncodingOptions options =
+      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+
+  var request = await SigningRequestManager.create(args, options: options);
+
+  var uri = request.encode();
+  print('action\n' + uri);
 }

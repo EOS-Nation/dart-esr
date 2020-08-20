@@ -3,22 +3,17 @@ import 'package:dart_esr/dart_esr.dart';
 main(List<String> args) => identityExample();
 
 Future<void> identityExample() async {
-  var callback = CallbackType('asdf', true);
+  var callback = CallbackType('http://callback.com', true);
   var args = SigningRequestCreateIdentityArguments(callback,
-      chainId: ESRConstants.ChainIdLookup[ChainName.EOS_JUNGLE2],
+      chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
       account: ESRConstants.PlaceholderName,
       permission: ESRConstants.PlaceholderPermission);
 
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
-      nodeUrl: 'https://jungle.greymass.com');
+  SigningRequestEncodingOptions options =
+      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
 
-  try {
-    var idReq = await SigningRequestManager.identity(args, options: options);
+  var idReq = await SigningRequestManager.identity(args, options: options);
 
-    // encode signing request as URI string
-    var uri = idReq.encode();
-    print('identity\n' + uri);
-  } catch (e) {
-    print(e.toString());
-  }
+  var uri = idReq.encode();
+  print('identity\n' + uri);
 }

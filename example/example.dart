@@ -1,4 +1,4 @@
-import 'deserialize_signing_request.dart';
+import 'decode_signing_request.dart';
 import 'encode_action.dart';
 import 'encode_actions.dart';
 import 'encode_identity.dart';
@@ -9,5 +9,5 @@ main(List<String> args) async {
   actionExample();
   actionsExample();
   identityExample();
-  desezializeExample();
+  decodeExample();
 }
