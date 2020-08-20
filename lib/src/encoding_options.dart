@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:archive/archive_io.dart';
 import 'package:dart_esr/src/models/request_signature.dart';
 import 'package:eosdart/eosdart.dart' as eosDart;
+
+import 'package:dart_esr/zlib/archive.dart';
 
 SigningRequestEncodingOptions defaultSigningRequestEncodingOptions(
         {String nodeUrl = 'https://eos.greymass.com',
