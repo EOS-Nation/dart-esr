@@ -27,7 +27,7 @@ Future<void> actionsExample() async {
 
   var args = SigningRequestCreateArguments(
     actions: [action, action2, action3],
-    chainId: 'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
+    chainId: ESRConstants.ChainIdLookup[ChainName.EOS_JUNGLE2],
   );
   SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
       nodeUrl: 'https://jungle.greymass.com');

@@ -5,13 +5,12 @@ main(List<String> args) => identityExample();
 Future<void> identityExample() async {
   var callback = CallbackType('asdf', true);
   var args = SigningRequestCreateIdentityArguments(callback,
-      chainId:
-          'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473',
+      chainId: ESRConstants.ChainIdLookup[ChainName.EOS_JUNGLE2],
       account: ESRConstants.PlaceholderName,
       permission: ESRConstants.PlaceholderPermission);
 
-  SigningRequestEncodingOptions options =
-      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://jungle.greymass.com');
 
   try {
     var idReq = await SigningRequestManager.identity(args, options: options);

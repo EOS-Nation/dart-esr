@@ -7,8 +7,7 @@ import 'package:eosdart/eosdart.dart' as eosDart;
 import 'package:dart_esr/zlib/archive.dart';
 
 SigningRequestEncodingOptions defaultSigningRequestEncodingOptions(
-        {String nodeUrl = 'https://eos.greymass.com',
-        String nodeVersion = 'v1'}) =>
+        {String nodeUrl = 'https://eos.eosn.io', String nodeVersion = 'v1'}) =>
     SigningRequestEncodingOptions(
         textEncoder: DefaultTextEncoder(),
         textDecoder: DefaultTextDecoder(),
