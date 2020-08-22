@@ -1,22 +1,19 @@
 import 'package:dart_esr/dart_esr.dart';
 
-void main(List<String> arguments) => identityExample();
+main(List<String> args) => identityExample();
 
 Future<void> identityExample() async {
-  print('Identity');
-  var esr = EOSIOSigningrequest('https://jungle2.cryptolions.io', 'v1',
-      chainName: ChainName.EOS_JUNGLE2);
+  var callback = CallbackType('http://callback.com', true);
+  var args = SigningRequestCreateIdentityArguments(callback,
+      chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+      account: ESRConstants.PlaceholderName,
+      permission: ESRConstants.PlaceholderPermission);
 
-  var permission = IdentityPermission()
-    ..actor = 'testname1111'
-    ..permission = 'active';
+  SigningRequestEncodingOptions options =
+      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
 
-  var identity = Identity()..identityPermission = permission;
-  String callback = "https://cNallback.com";
+  var idReq = await SigningRequestManager.identity(args, options: options);
 
-  var encoded = await esr.encodeIdentity(identity, callback);
-  var decoded = esr.deserialize(encoded);
-
-  print('encoded : ' + encoded);
-  print('decoded : ' + decoded.toString());
+  var uri = idReq.encode();
+  print('identity\n' + uri);
 }

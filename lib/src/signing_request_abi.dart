@@ -1,4 +1,4 @@
-String signingRequestJson = '''
+String signingRequestAbi = '''
 {
    "version": "eosio::abi/1.1",
    "types": [
