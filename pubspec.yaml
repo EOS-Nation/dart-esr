@@ -11,10 +11,8 @@ dependencies:
   http: ^0.12.0+4
   json_annotation: ^3.0.1
   pointycastle: ^1.0.2
-  eosdart:
-    git:
-      url: https://github.com/TheRealPaco/eosdart.git
-      
+  eosdart: ^0.4.4
+
 dev_dependencies:
   test: ^1.0.0
   build_runner: ^1.7.4
