@@ -1,27 +1,32 @@
 import 'package:dart_esr/dart_esr.dart';
 
-void main(List<String> arguments) => actionExample();
+main(List<String> args) => actionExample();
 
 Future<void> actionExample() async {
-  print('Action');
-  var esr = EOSIOSigningrequest('https://jungle2.cryptolions.io', 'v1',
-      chainName: ChainName.EOS_JUNGLE2);
+  var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
-  var auth = <Authorization>[
-    Authorization.fromJson(ESRConstants.PlaceholderAuth)
-  ];
-
-  var data = <String, String>{'name': 'data'};
+  var data = <String, dynamic>{
+    'voter': ESRConstants.PlaceholderName,
+    'proxy': 'eosnationftw',
+    'producers': [],
+  };
 
   var action = Action()
-    ..account = 'eosnpingpong'
-    ..name = 'ping'
+    ..account = 'eosio'
+    ..name = 'voteproducer'
     ..authorization = auth
     ..data = data;
 
-  var encoded = await esr.encodeAction(action);
-  var decoded = esr.deserialize(encoded);
+  var args = SigningRequestCreateArguments(
+    action: action,
+    chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+  );
 
-  print('encoded : ' + encoded);
-  print('decoded : ' + decoded.toString());
+  SigningRequestEncodingOptions options =
+      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+
+  var request = await SigningRequestManager.create(args, options: options);
+
+  var uri = request.encode();
+  print('action\n' + uri);
 }
