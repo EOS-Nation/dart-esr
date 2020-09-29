@@ -10,7 +10,7 @@ Future<void> identityExample() async {
       permission: ESRConstants.PlaceholderPermission);
 
   SigningRequestEncodingOptions options =
-      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+      defaultSigningRequestEncodingOptions2(nodeUrl: 'https://eos.eosn.io');
 
   var idReq = await SigningRequestManager.identity(args, options: options);
 

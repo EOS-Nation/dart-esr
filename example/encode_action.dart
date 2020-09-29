@@ -23,7 +23,7 @@ Future<void> actionExample() async {
   );
 
   SigningRequestEncodingOptions options =
-      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+      defaultSigningRequestEncodingOptions2(nodeUrl: 'https://eos.eosn.io');
 
   var request = await SigningRequestManager.create(args, options: options);
 

@@ -31,7 +31,7 @@ Future<void> actionsExample() async {
     actions: [action, action2, action3],
     chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
   );
-  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions2(
       nodeUrl: 'https://jungle.greymass.com');
 
   var request = await SigningRequestManager.create(args, options: options);

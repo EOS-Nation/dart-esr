@@ -56,7 +56,7 @@ class SigningRequestManager {
     SigningRequestEncodingOptions options,
   }) async {
     if (options == null) {
-      options = defaultSigningRequestEncodingOptions();
+      options = defaultSigningRequestEncodingOptions2();
     }
     TextEncoder textEncoder =
         options.textEncoder != null ? options.textEncoder : DefaultTextEncoder;

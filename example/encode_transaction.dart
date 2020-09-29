@@ -24,7 +24,7 @@ Future<void> transactionExample() async {
     chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
   );
   SigningRequestEncodingOptions options =
-      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+      defaultSigningRequestEncodingOptions2(nodeUrl: 'https://eos.eosn.io');
 
   var request = await SigningRequestManager.create(args, options: options);
 

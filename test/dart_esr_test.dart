@@ -6,7 +6,8 @@ void main() {
     var chainId =
         'e70aaab8997e1dfce58fbfac80cbbb8fecec7b99cf982a9444273cbc64c41473';
     var transferUri =
-        'esr://gmN8zrVqx8w62T9P-_evaTi9u__Nm-qZ52doTXFRt9mTckSkmIFhWZMJ8yuDUAYGhnBdm7NnGRkZIIAJSiuCsL-voBGQVgLRAuoQCRZX_2AwA6gDAA';
+     // 'esr:gmNgYmAoCOJqXqlwloGBIVzX5uxZRkYGCGCC0ooOD0M-rirWLGZg8PNKbLi5tKFFDizBEuzq6hIMZAB1AAA';
+    'esr://gmN8zrVqx8w62T9P-_evaTi9u__Nm-qZ52doTXFRt9mTckSkmIFhWZMJ8yuDUAYGhnBdm7NnGRkZIIAJSiuCsL-voBGQVgLRAuoQCRZX_2AwA6gDAA';
 
     test('encode transfer action', () async {
       var auth = [ESRConstants.PlaceholderAuth];
@@ -27,7 +28,7 @@ void main() {
       var args =
           SigningRequestCreateArguments(action: action, chainId: chainId);
 
-      var options = defaultSigningRequestEncodingOptions;
+      var options =  defaultSigningRequestEncodingOptions2();
 
       var request = await SigningRequestManager.create(args, options: options);
 
@@ -39,7 +40,7 @@ void main() {
     test('decode transfer action', () async {
       var request = await SigningRequestManager.from(
         transferUri,
-        options: defaultSigningRequestEncodingOptions,
+        options: defaultSigningRequestEncodingOptions2(),
       );
 
       expect(request.data.chainId[1].toLowerCase(), chainId);
