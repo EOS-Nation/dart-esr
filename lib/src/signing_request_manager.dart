@@ -588,7 +588,12 @@ class SigningRequestManager {
             ..data = data
         ];
       case 'transaction':
-        return req[1].actions;
+        List<dynamic> actionsRaw = req[1]['actions'];
+        List<Action> actions = [];
+        for (var item in actionsRaw) {
+          actions.add(Action.fromJson(new Map<String, dynamic>.from(item)));
+        }
+        return actions;
       default:
         throw 'Invalid signing request data';
     }
