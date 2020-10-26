@@ -1,86 +1,116 @@
 # dart-esr
 
-dart-esr is used to generate an EOSIO signing request (ESR) for a transaction/action/actions[]/identity request to be send, sign and broadcast to a node by a wallet (Anchor)
+dart-esr is used to generate an EOSIO signing request (ESR) for a transaction/action/actions[]/identity request to be send, sign and broadcast to a node by a wallet (Greymass' Anchor Wallet or other supporting ESR)
 
-ESR protocol documentation -> https://github.com/eosio-eps/EEPs/blob/master/EEPS/eep-7.md#ESR---The--EOSIO-Signing-Request--protocol 
+Greymass' ESR protocol documentation -> https://github.com/eosio-eps/EEPs/blob/master/EEPS/eep-7.md#ESR---The--EOSIO-Signing-Request--protocol 
 
-dart-esr is based on javascript library eosio-signing-request -> https://github.com/greymass/eosio-signing-request
+dart-esr is based on the javascript library eosio-signing-request -> https://github.com/greymass/eosio-signing-request
 
 Request format -> https://github.com/eosio-eps/EEPs/blob/master/EEPS/eep-7.md#payload
 
 ## Examples
 
-https://github.com/EOS-Nation/dart-esr/tree/feature/eosio-signing-request/example
+https://github.com/EOS-Nation/dart-esr/tree/master/example
 
 ## Usage
 
-####Import
+#### Import
 ```dart
 import 'package:dart_esr/dart_esr.dart';
 ```
 
-####Create Signing request object with a eos node url, version and ChainName
-```dart
+#### Encode an action
 
-var esr = EOSIOSigningrequest('https://jungle2.cryptolions.io', 'v1',
-    chainName: ChainName.EOS_JUNGLE2);
+```dart
+  var auth = <Authorization>[ESRConstants.PlaceholderAuth];
+
+  var data = <String, dynamic>{
+    'voter': ESRConstants.PlaceholderName,
+    'proxy': 'eosnationftw',
+    'producers': [],
+  };
+
+  var action = Action()
+    ..account = 'eosio'
+    ..name = 'voteproducer'
+    ..authorization = auth
+    ..data = data;
+
+  var args = SigningRequestCreateArguments(
+    action: action,
+    chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+  );
+
+  SigningRequestEncodingOptions options =
+      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+
+  var request = await SigningRequestManager.create(args, options: options);
+
+  var uri = request.encode();
+  print('action\n' + uri);
 ```
 
-####Encode a transaction 
+#### Encode a transaction 
 ```dart
-var auth = <Authorization>[
-    Authorization()
-      ..actor = 'testName1111'
-      ..permission = 'active'
-  ];
+ var auth = <Authorization>[ESRConstants.PlaceholderAuth];
 
-  var data = <String, String>{'name': 'data'};
+  var data = <String, dynamic>{
+    'voter': ESRConstants.PlaceholderName,
+    'proxy': 'eosnationftw',
+    'producers': [],
+  };
 
-  var actions = <Action>[
-    Action()
-      ..account = 'eosnpingpong'
-      ..name = 'ping'
-      ..authorization = auth
-      ..data = data,
-  ];
+  var action = Action()
+    ..account = 'eosio'
+    ..name = 'voteproducer'
+    ..authorization = auth
+    ..data = data;
 
-  var transaction = Transaction()..actions = actions;
+  var transaction = Transaction()..actions = [action];
 
-  var encoded = await esr.encodeTransaction(transaction);
+  var args = SigningRequestCreateArguments(
+    transaction: transaction,
+    chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+  );
+  SigningRequestEncodingOptions options =
+      defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io');
+
+  var request = await SigningRequestManager.create(args, options: options);
+
+  var uri = request.encode();
+  print('transaction\n' + uri);
 ```
-####Encode an action
 
+#### Encode an identity request
 ```dart
-var auth = <Authorization>[
-    Authorization.fromJson(ESRConstants.PlaceholderAuth)
-  ];
+  var callback = CallbackType('http://callback.com', true);
+  var args = SigningRequestCreateIdentityArguments(callback,
+      chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+      account: ESRConstants.PlaceholderName,
+      permission: ESRConstants.PlaceholderPermission);
 
-  var data = <String, String>{'name': 'data'};
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://eos.eosn.io');
+
+    var idReq = await SigningRequestManager.identity(args, options: options);
+
+    var uri = idReq.encode();
+    print('identity\n' + uri);
+```
+
+#### Encode a list of actions 
+```dart
+  var auth = <Authorization>[ESRConstants.PlaceholderAuth];
+
+  var data1 = <String, String>{'name': 'data1'};
+  var data2 = <String, String>{'name': 'data2'};
+  var data3 = <String, String>{'name': 'data3'};
 
   var action = Action()
     ..account = 'eosnpingpong'
     ..name = 'ping'
     ..authorization = auth
-    ..data = data;
-
-  var encoded = await esr.encodeAction(action);
-```
-
-####Encode a list of actions 
-```dart
-var auth = <Authorization>[
-    Authorization.fromJson(ESRConstants.PlaceholderAuth)
-  ];
-
-  var data1 = <String, String>{'name': 'data1'};
-
-  var action1 = Action()
-    ..account = 'eosnpingpong'
-    ..name = 'ping'
-    ..authorization = auth
     ..data = data1;
-
-  var data2 = <String, String>{'name': 'data2'};
 
   var action2 = Action()
     ..account = 'eosnpingpong'
@@ -88,25 +118,48 @@ var auth = <Authorization>[
     ..authorization = auth
     ..data = data2;
 
-  var actions = <Action>[action1, action2];
+  var action3 = Action()
+    ..account = 'eosnpingpong'
+    ..name = 'ping'
+    ..authorization = auth
+    ..data = data3;
 
-  var encoded = await esr.encodeActions(actions);
+  var args = SigningRequestCreateArguments(
+    actions: [action, action2, action3],
+    chainId: ESRConstants.ChainIdLookup[ChainName.EOS],
+  );
+  SigningRequestEncodingOptions options = defaultSigningRequestEncodingOptions(
+      nodeUrl: 'https://jungle.greymass.com');
+
+  var request = await SigningRequestManager.create(args, options: options);
+  
+  var uri = request.encode();
+  print('actions\n' + uri);
 ```
-####Encode an identity request
+
+#### Decode a signing request 
 ```dart
-  var permission = IdentityPermission()
-    ..actor = 'testname1111'
-    ..permission = 'active';
+  var esr =
+      'esr://gmNcs7jsE9uOP6rL3rrcvpMWUmN27LCdleD836_eTzFz-vCSjQEMXhmEFohe6ry3yuguIyNEiIEJSgvCBA58nnUl1dgwlAEoAAA';
+  var request = SigningRequestManager.from(esr,
+      options:
+          defaultSigningRequestEncodingOptions(nodeUrl: 'https://eos.eosn.io'));
 
-  var identity = Identity()..identityPermission = permission;
-  String callback = "https://cNallback.com";
-
-  var encoded = await esr.encodeIdentity(identity, callback);
+  print('decode\n' + request?.data?.toString());
 ```
 
 ## Installing
-TODO when added to pub.dev
+The package is available in pub dev repository => https://pub.dev/packages/dart_esr
+or in github => https://github.com/EOS-Nation/dart-esr
 
+1 - Resolve dependencies
+```console
+pub get
+```
+2 - Execute examples
+```console
+pub run example/example.dart
+```
 
 ## Features and bugs
 

@@ -1,21 +1,17 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
 part of 'identity.dart';
 
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
 Identity _$IdentityFromJson(Map<String, dynamic> json) {
-  return Identity()..identityPermission = json['permission'];
+  return Identity()
+    ..authorization =
+        Authorization.fromJson(Map<String, dynamic>.from(json['permission']));
 }
 
 Map<String, dynamic> _$IdentityToJson(Identity instance) => <String, dynamic>{
-      'permission': instance.identityPermission.toJson(),
-    };
-
-IdentityPermission _$IdentityPermissionFromJson(Map<String, dynamic> json) {
-  return IdentityPermission()
-    ..actor = json['actor'] as String
-    ..permission = json['permission'] as String;
-}
-
-Map<String, dynamic> _$IdentityPermissionToJson(IdentityPermission instance) =>
-    <String, dynamic>{
-      'actor': instance.actor,
-      'permission': instance.permission
+      'permission': instance.authorization.toJson(),
     };
