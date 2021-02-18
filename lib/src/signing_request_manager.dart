@@ -563,23 +563,21 @@ class SigningRequestManager {
         //TODO return list of actions
         return req[1];
       case 'identity':
+        var auth = Authorization()
+          ..actor = req[1]['permission'] != null &&
+                  req[1]['permission']['actor'] != null
+              ? req[1]['permission']['actor']
+              : ESRConstants.PlaceholderName
+          ..permission = req[1]['permission'] != null &&
+                  req[1]['permission']['permission'] != null
+              ? req[1]['permission']['permission']
+              : ESRConstants.PlaceholderPermission;
+
+        var identity = Identity()..authorization = auth;
+
         var data =
-            '0101000000000000000200000000000000'; // placeholder permission
-        var authorization = [ESRConstants.PlaceholderAuth];
-        var req1 = req[1];
-        if (req1['permission'] != null) {
-          var auth = Authorization()
-            ..actor =
-                req1['permission']['actor'] ?? ESRConstants.PlaceholderName
-            ..permission = req1['permission']['permission'] ??
-                ESRConstants.PlaceholderPermission;
-
-          var identity = Identity()..authorization = auth;
-
-          data = eosDart
-              .arrayToHex(identity.toBinary(SigningRequestManager.idType));
-          authorization = [auth];
-        }
+            eosDart.arrayToHex(identity.toBinary(SigningRequestManager.idType));
+        var authorization = [auth];
         return [
           Action()
             ..account = ''
@@ -588,7 +586,12 @@ class SigningRequestManager {
             ..data = data
         ];
       case 'transaction':
-        return req[1].actions;
+        List<dynamic> actionsRaw = req[1]['actions'];
+        List<Action> actions = [];
+        for (var item in actionsRaw) {
+          actions.add(Action.fromJson(new Map<String, dynamic>.from(item)));
+        }
+        return actions;
       default:
         throw 'Invalid signing request data';
     }
