@@ -1,19 +1,32 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
 part of 'signing_request.dart';
 
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
 SigningRequest _$SigningRequestFromJson(Map<String, dynamic> json) {
+  List info = json['info'];
+  List<InfoPair> infos = info
+      .map((e) => (InfoPair()
+        ..key = e['key']
+        ..value = e['value']))
+      .toList();
   return SigningRequest()
-    ..chainId = (json['chain_id'] as List) ?? []
-    ..req = (json['req'] as List) ?? []
-    ..flags = json['flags'] as int ?? 1
-    ..callback = json['callback'] as String ?? ''
-    ..info = (json['info'] as List) ?? [];
+    ..chainId = json['chain_id'] as List
+    ..req = json['req'] as List
+    ..flags = json['flags'] as int
+    ..callback = json['callback'] as String
+    ..info = infos;
 }
 
-Map<String, dynamic> _$SigningRequestToJson(SigningRequest instance) =>
-    <String, dynamic>{
-      'chain_id': instance.chainId,
-      'req': instance.req,
-      'flags': instance.flags,
-      'callback': instance.callback,
-      'info': instance.info
-    };
+Map<String, dynamic> _$SigningRequestToJson(SigningRequest instance) {
+  return <String, dynamic>{
+    'chain_id': instance.chainId,
+    'req': instance.req,
+    'flags': instance.flags,
+    'callback': instance.callback,
+    'info': instance.info?.map((e) => e?.toJson())?.toList(),
+  };
+}

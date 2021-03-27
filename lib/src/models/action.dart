@@ -1,23 +1,33 @@
 import 'dart:typed_data';
 
 import 'package:dart_esr/src/models/authorization.dart';
+import 'package:eosdart/eosdart.dart' as eosDart;
 import 'package:json_annotation/json_annotation.dart';
 
-import 'package:eosdart/eosdart.dart' as eosDart;
-
-part 'identity.g.dart';
+part 'action.g.dart';
 
 @JsonSerializable(explicitToJson: true)
-class Identity {
-  @JsonKey(name: 'permission')
-  Authorization authorization;
+class Action {
+  @JsonKey(name: 'account')
+  String account;
 
-  Identity();
+  @JsonKey(name: 'name')
+  String name;
 
-  factory Identity.fromJson(Map<String, dynamic> json) =>
-      _$IdentityFromJson(json);
+  @JsonKey(name: 'authorization')
+  List<Authorization> authorization;
 
-  Map<String, dynamic> toJson() => _$IdentityToJson(this);
+  @JsonKey(name: 'data')
+  Object data;
+
+//  @JsonKey(name: 'hex_data')
+//  String hexData;
+
+  Action();
+
+  factory Action.fromJson(Map<String, dynamic> json) => _$ActionFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ActionToJson(this);
 
   @override
   String toString() => this.toJson().toString();
@@ -28,7 +38,7 @@ class Identity {
     return buffer.asUint8List();
   }
 
-  factory Identity.fromBinary(eosDart.Type type, dynamic data) {
+  factory Action.fromBinary(eosDart.Type type, dynamic data) {
     eosDart.SerialBuffer buffer;
     if (data is eosDart.SerialBuffer) {
       buffer = data;
@@ -39,6 +49,6 @@ class Identity {
     }
     var deserializedData =
         Map<String, dynamic>.from(type.deserialize(type, buffer));
-    return Identity.fromJson(deserializedData);
+    return Action.fromJson(deserializedData);
   }
 }

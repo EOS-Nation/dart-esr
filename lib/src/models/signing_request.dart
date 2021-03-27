@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:dart_esr/src/models/info_pair.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import 'package:eosdart/eosdart.dart';
@@ -20,7 +21,7 @@ class SigningRequest {
   String callback = '';
 
   @JsonKey(name: 'info')
-  List<dynamic> info = [];
+  List<InfoPair> info = [];
 
   SigningRequest();
 
@@ -38,8 +39,15 @@ class SigningRequest {
     return buffer.asUint8List();
   }
 
-  factory SigningRequest.fromBinary(Type type, Uint8List data) {
-    var buffer = SerialBuffer(data);
+  factory SigningRequest.fromBinary(Type type, dynamic data) {
+    SerialBuffer buffer;
+    if (data is SerialBuffer) {
+      buffer = data;
+    } else if (data is Uint8List) {
+      buffer = SerialBuffer(data);
+    } else {
+      throw 'Data must be either Uint8List or SerialBuffer';
+    }
     var deserializedData =
         Map<String, dynamic>.from(type.deserialize(type, buffer));
     return SigningRequest.fromJson(deserializedData);
